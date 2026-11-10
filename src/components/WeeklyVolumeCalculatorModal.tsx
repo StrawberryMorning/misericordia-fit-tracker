@@ -116,8 +116,8 @@ export function WeeklyVolumeCalculatorModal({
               </h2>
               <p className="text-xs text-slate-400">
                 {blockName ? `Bloco: ${blockName} — ` : ""}Analisa as fichas do bloco ativo e verifica se cada músculo está na
-                zona ideal ({profile.minOptimalSets} a {profile.maxOptimalSets}{" "}
-                séries/semana)
+                meta ideal ({profile.minOptimalSets} a {profile.maxOptimalSets}{" "}
+                séries semanais por grupo muscular)
               </p>
             </div>
           </div>

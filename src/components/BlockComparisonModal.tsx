@@ -109,8 +109,8 @@ export function BlockComparisonModal({
                 Comparar Blocos Semanais
               </h2>
               <p className="text-xs text-slate-400">
-                Perfil: {profile.title} • Zona ideal {profile.minOptimalSets}–
-                {profile.maxOptimalSets} séries/sem
+                Perfil: {profile.title} • Meta: {profile.minOptimalSets}–
+                {profile.maxOptimalSets} séries por grupo muscular
                 {includeSynergists ? " • incluindo séries indiretas" : ""}
               </p>
             </div>

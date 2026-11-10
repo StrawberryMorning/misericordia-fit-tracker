@@ -226,11 +226,9 @@ export function TrainingBlockBar({
             Volume semanal deste bloco
           </span>
           <span className="text-slate-400">
-            <strong className="text-white">{volume.totalDirectSets}</strong>{" "}
-            séries •{" "}
-            <strong className="text-white">{volume.sessionsPerWeek}</strong>{" "}
-            treinos/sem • ideal {profile.minOptimalSets}–
-            {profile.maxOptimalSets}
+            Total do bloco: <strong className="text-white">{volume.totalDirectSets} séries</strong> •{" "}
+            <strong className="text-white">{volume.sessionsPerWeek} treinos/sem</strong> • Meta:{" "}
+            <strong className="text-emerald-400">{profile.minOptimalSets}–{profile.maxOptimalSets} séries por músculo</strong>
           </span>
         </div>
         <div className="flex flex-wrap gap-1.5">
