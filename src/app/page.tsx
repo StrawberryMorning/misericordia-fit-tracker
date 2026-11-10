@@ -28,7 +28,7 @@ import {
 } from "lucide-react";
 
 const LOCAL_STORAGE_KEY = "brass_bell_v2_db_clean";
-const THEME_STORAGE_KEY = "brass_bell_theme_mode";
+const THEME_STORAGE_KEY = "brass_bell_theme_mode_v2";
 
 export default function HomePage() {
   const [activeTab, setActiveTab] = useState<"dashboard" | "workout" | "body">(
@@ -40,31 +40,30 @@ export default function HomePage() {
   const [syncStatus, setSyncStatus] = useState<
     "synced" | "syncing" | "offline"
   >("synced");
-  const [isMonochrome, setIsMonochrome] = useState<boolean>(false);
+  const [themeMode, setThemeMode] = useState<"dark" | "light">("dark");
 
-  // Inicialização do modo Preto e Branco (Respeitando default do sistema e preferência salva)
+  // Inicialização do tema Claro / Escuro (Default pelo sistema, persistido no localStorage)
   useEffect(() => {
     const saved = localStorage.getItem(THEME_STORAGE_KEY);
-    if (saved !== null) {
-      const isMono = saved === "monochrome";
-      setIsMonochrome(isMono);
-      document.documentElement.classList.toggle("monochrome", isMono);
+    if (saved === "light" || saved === "dark") {
+      setThemeMode(saved);
+      document.documentElement.classList.toggle("dark", saved === "dark");
     } else {
-      // Default pelo sistema: se o usuário no sistema prefere alto contraste / monochrome (monochrome media query)
-      const systemPrefersMono =
+      // Default do sistema: verifica se o SO está em modo claro ou escuro
+      const systemPrefersDark =
         window.matchMedia &&
-        (window.matchMedia("(monochrome)").matches ||
-          window.matchMedia("(forced-colors: active)").matches);
-      setIsMonochrome(Boolean(systemPrefersMono));
-      document.documentElement.classList.toggle("monochrome", Boolean(systemPrefersMono));
+        window.matchMedia("(prefers-color-scheme: dark)").matches;
+      const initial = systemPrefersDark ? "dark" : "light";
+      setThemeMode(initial);
+      document.documentElement.classList.toggle("dark", initial === "dark");
     }
   }, []);
 
-  const toggleMonochrome = () => {
-    setIsMonochrome((prev) => {
-      const next = !prev;
-      localStorage.setItem(THEME_STORAGE_KEY, next ? "monochrome" : "default");
-      document.documentElement.classList.toggle("monochrome", next);
+  const toggleTheme = () => {
+    setThemeMode((prev) => {
+      const next = prev === "dark" ? "light" : "dark";
+      localStorage.setItem(THEME_STORAGE_KEY, next);
+      document.documentElement.classList.toggle("dark", next === "dark");
       return next;
     });
   };
@@ -240,21 +239,18 @@ export default function HomePage() {
                 </div>
               </div>
 
-              {/* Botão Sutil de Modo Preto e Branco */}
+              {/* Botão Sutil de Tema Claro / Escuro */}
               <button
                 type="button"
-                onClick={toggleMonochrome}
-                title={isMonochrome ? "Ativar Modo Colorido" : "Ativar Modo Preto e Branco"}
-                className={`p-2 rounded-xl border transition-all cursor-pointer ${
-                  isMonochrome
-                    ? "bg-white text-slate-950 border-white shadow-sm"
-                    : "bg-slate-950/60 border-slate-800 text-slate-400 hover:text-slate-200 hover:border-slate-700"
-                }`}
+                onClick={toggleTheme}
+                title={themeMode === "dark" ? "Mudar para Tema Claro" : "Mudar para Tema Escuro"}
+                className="p-2 rounded-xl border border-slate-800 bg-slate-950/60 text-slate-400 hover:text-amber-400 hover:border-slate-700 transition-all cursor-pointer shadow-sm"
               >
-                <div className="w-4 h-4 rounded-full border border-current flex overflow-hidden">
-                  <span className="w-1/2 h-full bg-current" />
-                  <span className="w-1/2 h-full" />
-                </div>
+                {themeMode === "dark" ? (
+                  <Sun className="w-4 h-4 text-amber-400" />
+                ) : (
+                  <Moon className="w-4 h-4 text-indigo-500" />
+                )}
               </button>
             </div>
           </div>
@@ -373,18 +369,15 @@ export default function HomePage() {
           <div className="flex items-center gap-2">
             <button
               type="button"
-              onClick={toggleMonochrome}
-              title={isMonochrome ? "Ativar Modo Colorido" : "Ativar Modo Preto e Branco"}
-              className={`p-1.5 rounded-lg border text-xs flex items-center justify-center ${
-                isMonochrome
-                  ? "bg-white text-slate-950 border-white"
-                  : "bg-slate-950/60 border-slate-800 text-slate-400"
-              }`}
+              onClick={toggleTheme}
+              title={themeMode === "dark" ? "Mudar para Tema Claro" : "Mudar para Tema Escuro"}
+              className="p-2 rounded-lg border border-slate-800 bg-slate-950/60 text-slate-400 hover:text-amber-400 transition-all"
             >
-              <div className="w-3.5 h-3.5 rounded-full border border-current flex overflow-hidden">
-                <span className="w-1/2 h-full bg-current" />
-                <span className="w-1/2 h-full" />
-              </div>
+              {themeMode === "dark" ? (
+                <Sun className="w-3.5 h-3.5 text-amber-400" />
+              ) : (
+                <Moon className="w-3.5 h-3.5 text-indigo-500" />
+              )}
             </button>
             <button
               type="button"
