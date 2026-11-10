@@ -4,11 +4,13 @@ import React, { useEffect, useState } from "react";
 import {
   AppDatabase,
   BodyLog,
+  TrainingBlock,
   UserProfile,
   WorkoutRoutine,
   WorkoutSession,
 } from "@/lib/types";
 import { DEFAULT_DATABASE } from "@/lib/defaultData";
+import { normalizeDatabase } from "@/lib/trainingBlocks";
 import { DashboardTab } from "@/components/DashboardTab";
 import { WorkoutTrackerTab } from "@/components/WorkoutTrackerTab";
 import { BodyTrackerTab } from "@/components/BodyTrackerTab";
@@ -28,7 +30,9 @@ export default function HomePage() {
   const [activeTab, setActiveTab] = useState<"dashboard" | "workout" | "body">(
     "dashboard"
   );
-  const [db, setDb] = useState<AppDatabase>(DEFAULT_DATABASE);
+  const [db, setDb] = useState<AppDatabase>(() =>
+    normalizeDatabase(DEFAULT_DATABASE)
+  );
   const [syncStatus, setSyncStatus] = useState<
     "synced" | "syncing" | "offline"
   >("synced");
@@ -39,7 +43,9 @@ export default function HomePage() {
       try {
         const res = await fetch("/api/sync");
         if (res.ok) {
-          const serverDb = (await res.json()) as AppDatabase;
+          const serverDb = normalizeDatabase(
+            (await res.json()) as AppDatabase
+          );
           setDb(serverDb);
           localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(serverDb));
           setSyncStatus("synced");
@@ -52,9 +58,9 @@ export default function HomePage() {
       const cached = localStorage.getItem(LOCAL_STORAGE_KEY);
       if (cached) {
         try {
-          setDb(JSON.parse(cached));
+          setDb(normalizeDatabase(JSON.parse(cached)));
         } catch {
-          setDb(DEFAULT_DATABASE);
+          setDb(normalizeDatabase(DEFAULT_DATABASE));
         }
       }
       setSyncStatus("offline");
@@ -66,7 +72,7 @@ export default function HomePage() {
   // Persist changes to LocalStorage AND Server API
   const persistDatabase = async (nextDb: AppDatabase) => {
     const stamped: AppDatabase = {
-      ...nextDb,
+      ...normalizeDatabase(nextDb),
       updatedAt: new Date().toISOString(),
     };
     setDb(stamped);
@@ -117,8 +123,20 @@ export default function HomePage() {
     });
   };
 
+  // Atualiza as fichas do BLOCO ATIVO
   const handleUpdateRoutines = (routines: WorkoutRoutine[]) => {
-    persistDatabase({ ...db, routines });
+    const blocks = (db.trainingBlocks || []).map((b) =>
+      b.id === db.activeBlockId ? { ...b, routines } : b
+    );
+    persistDatabase({ ...db, trainingBlocks: blocks, routines });
+  };
+
+  // Atualiza a lista de blocos semanais e/ou o bloco ativo
+  const handleUpdateBlocks = (
+    blocks: TrainingBlock[],
+    activeBlockId: string
+  ) => {
+    persistDatabase({ ...db, trainingBlocks: blocks, activeBlockId });
   };
 
   const handleResetAllData = () => {
@@ -129,7 +147,11 @@ export default function HomePage() {
     ) {
       localStorage.removeItem("brass_bell_v2_db");
       localStorage.removeItem(LOCAL_STORAGE_KEY);
-      persistDatabase(DEFAULT_DATABASE);
+      persistDatabase({
+        ...DEFAULT_DATABASE,
+        trainingBlocks: undefined,
+        activeBlockId: undefined,
+      });
     }
   };
 
@@ -330,9 +352,12 @@ export default function HomePage() {
           {activeTab === "workout" && (
             <WorkoutTrackerTab
               routines={db.routines}
+              blocks={db.trainingBlocks || []}
+              activeBlockId={db.activeBlockId || ""}
               sessions={db.workoutSessions}
               onSaveSession={handleSaveWorkoutSession}
               onUpdateRoutines={handleUpdateRoutines}
+              onUpdateBlocks={handleUpdateBlocks}
               onDeleteSession={handleDeleteWorkoutSession}
             />
           )}

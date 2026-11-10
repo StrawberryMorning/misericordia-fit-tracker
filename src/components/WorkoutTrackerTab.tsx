@@ -4,11 +4,19 @@ import React, { useEffect, useRef, useState } from "react";
 import {
   ExerciseTemplate,
   PerformedExercise,
+  TrainingBlock,
   WorkoutRoutine,
   WorkoutSession,
 } from "@/lib/types";
+import { generateId } from "@/lib/trainingBlocks";
+import { TrainingStimulus } from "@/lib/volume";
+import { TrainingBlockBar } from "./TrainingBlockBar";
+import { BlockComparisonModal } from "./BlockComparisonModal";
 import { calculateEstimated1RM } from "@/lib/formulas";
-import { WorkoutSplitGuideModal } from "./WorkoutSplitGuideModal";
+import {
+  SplitApplyMode,
+  WorkoutSplitGuideModal,
+} from "./WorkoutSplitGuideModal";
 import { WeeklyVolumeCalculatorModal } from "./WeeklyVolumeCalculatorModal";
 import {
   ExerciseExecutionModal,
@@ -45,10 +53,13 @@ import {
 } from "lucide-react";
 
 interface WorkoutTrackerTabProps {
-  routines: WorkoutRoutine[];
+  routines: WorkoutRoutine[]; // Fichas do bloco ativo
+  blocks: TrainingBlock[];
+  activeBlockId: string;
   sessions: WorkoutSession[];
   onSaveSession: (session: WorkoutSession) => void;
   onUpdateRoutines: (routines: WorkoutRoutine[]) => void;
+  onUpdateBlocks: (blocks: TrainingBlock[], activeBlockId: string) => void;
   onDeleteSession: (id: string) => void;
 }
 
@@ -103,11 +114,15 @@ export function formatDuration(seconds: number): string {
 
 export function WorkoutTrackerTab({
   routines,
+  blocks,
+  activeBlockId,
   sessions,
   onSaveSession,
   onUpdateRoutines,
+  onUpdateBlocks,
   onDeleteSession,
 }: WorkoutTrackerTabProps) {
+  const activeBlock = blocks.find((b) => b.id === activeBlockId) || blocks[0];
   // Active Workout Session State
   const [activeRoutine, setActiveRoutine] = useState<WorkoutRoutine | null>(
     null
@@ -142,6 +157,10 @@ export function WorkoutTrackerTab({
   const [isSplitGuideOpen, setIsSplitGuideOpen] = useState(false);
   const [isVolumeCalcOpen, setIsVolumeCalcOpen] = useState(false);
   const [showBiomechanicsBanner, setShowBiomechanicsBanner] = useState(false);
+  const [isComparisonOpen, setIsComparisonOpen] = useState(false);
+  // Perfil de estímulo compartilhado entre Calculadora, Bloco e Comparação
+  const [stimulus, setStimulus] = useState<TrainingStimulus>("hypertrophy");
+  const [includeSynergists, setIncludeSynergists] = useState(false);
   const [previewExercise, setPreviewExercise] =
     useState<CatalogExercise | null>(null);
 
@@ -338,6 +357,8 @@ export function WorkoutTrackerTab({
       id: `session-${Date.now()}`,
       routineId: activeRoutine.id,
       routineName: activeRoutine.name,
+      blockId: activeBlock?.id,
+      blockName: activeBlock?.name,
       date: new Date().toISOString().split("T")[0],
       startedAt: sessionStartMs,
       finishedAt: Date.now(),
@@ -810,9 +831,34 @@ export function WorkoutTrackerTab({
         isOpen={isSplitGuideOpen}
         onClose={() => setIsSplitGuideOpen(false)}
         hasExistingRoutines={routines.length > 0}
-        onApplyRoutines={(generated, replaceExisting) => {
-          if (replaceExisting) {
-            onUpdateRoutines(generated);
+        onApplyRoutines={(generated, mode: SplitApplyMode, splitName) => {
+          if (mode === "newBlock") {
+            const created: TrainingBlock = {
+              id: generateId("block"),
+              name: `${splitName} — Bloco ${
+                blocks.filter((b) => b.splitType === splitName).length + 1
+              }`,
+              description: `Gerado pelo Guia de Divisões (${splitName})`,
+              splitType: splitName,
+              routines: generated,
+              weeklyFrequency: {},
+              createdAt: new Date().toISOString(),
+            };
+            onUpdateBlocks([...blocks, created], created.id);
+          } else if (mode === "replace") {
+            onUpdateBlocks(
+              blocks.map((b) =>
+                b.id === activeBlock?.id
+                  ? {
+                      ...b,
+                      routines: generated,
+                      splitType: splitName,
+                      weeklyFrequency: {},
+                    }
+                  : b
+              ),
+              activeBlock?.id || ""
+            );
           } else {
             onUpdateRoutines([...routines, ...generated]);
           }
@@ -820,11 +866,53 @@ export function WorkoutTrackerTab({
         }}
       />
 
+      <BlockComparisonModal
+        key={isComparisonOpen ? `cmp-${activeBlock?.id}` : "cmp-closed"}
+        isOpen={isComparisonOpen}
+        onClose={() => setIsComparisonOpen(false)}
+        blocks={blocks}
+        initialBlockAId={activeBlock?.id}
+        stimulus={stimulus}
+        includeSynergists={includeSynergists}
+      />
+
       <WeeklyVolumeCalculatorModal
         isOpen={isVolumeCalcOpen}
         onClose={() => setIsVolumeCalcOpen(false)}
         routines={routines}
         onUpdateRoutines={onUpdateRoutines}
+        blockName={activeBlock?.name}
+        weeklyFrequency={activeBlock?.weeklyFrequency || {}}
+        onUpdateFrequency={(freq) =>
+          onUpdateBlocks(
+            blocks.map((b) =>
+              b.id === activeBlock?.id ? { ...b, weeklyFrequency: freq } : b
+            ),
+            activeBlock?.id || ""
+          )
+        }
+        stimulus={stimulus}
+        onStimulusChange={setStimulus}
+        includeSynergists={includeSynergists}
+        onIncludeSynergistsChange={setIncludeSynergists}
+        onOpenComparison={() => {
+          setIsVolumeCalcOpen(false);
+          setIsComparisonOpen(true);
+        }}
+      />
+
+      {/* Seletor de Bloco Semanal (Mesociclo) + Volume embutido */}
+      <TrainingBlockBar
+        blocks={blocks}
+        activeBlockId={activeBlock?.id || ""}
+        onUpdateBlocks={(nextBlocks, nextActive) => {
+          if (nextActive !== activeBlock?.id) setEditingRoutineId(null);
+          onUpdateBlocks(nextBlocks, nextActive);
+        }}
+        stimulus={stimulus}
+        includeSynergists={includeSynergists}
+        onOpenComparison={() => setIsComparisonOpen(true)}
+        onOpenVolume={() => setIsVolumeCalcOpen(true)}
       />
 
       {/* Fichas de Treino Disponíveis */}
@@ -832,7 +920,7 @@ export function WorkoutTrackerTab({
         <div className="flex flex-wrap items-center justify-between gap-2">
           <div>
             <h2 className="text-base font-bold uppercase tracking-wider text-sky-400">
-              Suas Fichas de Treino (Splits)
+              Fichas do Bloco: {activeBlock?.name || "—"}
             </h2>
             <p className="text-xs text-slate-400">
               Escolha uma ficha para abrir o Modo Treino Ao Vivo com cronômetro
@@ -863,7 +951,9 @@ export function WorkoutTrackerTab({
                 type="button"
                 onClick={() => {
                   if (
-                    confirm("Deseja apagar todas as fichas de treino atuais?")
+                    confirm(
+                      `Deseja apagar todas as fichas do bloco "${activeBlock?.name}"?`
+                    )
                   ) {
                     onUpdateRoutines([]);
                     setEditingRoutineId(null);
@@ -872,7 +962,7 @@ export function WorkoutTrackerTab({
                 className="text-xs flex items-center gap-1.5 bg-rose-950/40 hover:bg-rose-900/50 border border-rose-800/40 text-rose-300 px-3 py-2 rounded-xl font-semibold transition-colors cursor-pointer"
               >
                 <Trash2 className="w-3.5 h-3.5" />
-                <span>Apagar Todas as Fichas</span>
+                <span>Apagar Fichas do Bloco</span>
               </button>
             )}
           </div>
@@ -1520,6 +1610,11 @@ export function WorkoutTrackerTab({
                       <div className="text-sm font-bold text-white mt-0.5">
                         {sess.routineName}
                       </div>
+                      {sess.blockName && (
+                        <span className="inline-block mt-1 text-[10px] font-semibold bg-indigo-500/15 text-indigo-300 border border-indigo-500/25 px-2 py-0.5 rounded-full">
+                          Bloco: {sess.blockName}
+                        </span>
+                      )}
                       <div className="text-xs text-slate-400 mt-1">
                         Séries concluídas:{" "}
                         <strong className="text-emerald-400">

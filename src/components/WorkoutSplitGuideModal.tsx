@@ -19,10 +19,16 @@ import {
   X,
 } from "lucide-react";
 
+export type SplitApplyMode = "newBlock" | "replace" | "append";
+
 interface WorkoutSplitGuideModalProps {
   isOpen: boolean;
   onClose: () => void;
-  onApplyRoutines: (newRoutines: WorkoutRoutine[], replaceExisting: boolean) => void;
+  onApplyRoutines: (
+    newRoutines: WorkoutRoutine[],
+    mode: SplitApplyMode,
+    splitName: string
+  ) => void;
   hasExistingRoutines: boolean;
 }
 
@@ -35,7 +41,7 @@ export function WorkoutSplitGuideModal({
   const [selectedSplitId, setSelectedSplitId] = useState<string>(
     WORKOUT_SPLITS_GUIDE[1].id // Upper / Lower default
   );
-  const [replaceMode, setReplaceMode] = useState<boolean>(true);
+  const [applyMode, setApplyMode] = useState<SplitApplyMode>("newBlock");
 
   if (!isOpen) return null;
 
@@ -45,7 +51,7 @@ export function WorkoutSplitGuideModal({
 
   const handleGenerate = (includeExercises: boolean) => {
     const generated = buildRoutinesFromSplit(currentSplit, includeExercises);
-    onApplyRoutines(generated, replaceMode);
+    onApplyRoutines(generated, applyMode, currentSplit.name);
     onClose();
   };
 
@@ -272,25 +278,37 @@ export function WorkoutSplitGuideModal({
 
         {/* Bottom Action Footer: User Chooses Empty Structure vs Full Suggested */}
         <div className="px-5 py-4 bg-slate-950 border-t border-slate-800 flex flex-wrap items-center justify-between gap-4">
-          {hasExistingRoutines ? (
-            <label className="flex items-center gap-2 text-xs text-slate-300 cursor-pointer">
-              <input
-                type="checkbox"
-                checked={replaceMode}
-                onChange={(e) => setReplaceMode(e.target.checked)}
-                className="rounded border-slate-700 bg-slate-900 text-sky-500"
-              />
-              <span>
-                Substituir minhas fichas atuais por esta divisão (desmarque para
-                apenas adicionar ao lado)
-              </span>
-            </label>
-          ) : (
-            <span className="text-xs text-slate-400">
-              Escolha como deseja aplicar a divisão{" "}
-              <strong className="text-white">{currentSplit.name}</strong>:
+          <div className="flex flex-col gap-1.5 text-xs text-slate-300">
+            <span className="text-slate-400">
+              Como aplicar <strong className="text-white">{currentSplit.name}</strong>:
             </span>
-          )}
+            <div className="flex flex-wrap gap-1.5">
+              {(
+                [
+                  { id: "newBlock", label: "Criar como novo bloco semanal" },
+                  ...(hasExistingRoutines
+                    ? [
+                        { id: "replace", label: "Substituir fichas do bloco atual" },
+                        { id: "append", label: "Adicionar ao bloco atual" },
+                      ]
+                    : [{ id: "replace", label: "Usar no bloco atual" }]),
+                ] as { id: SplitApplyMode; label: string }[]
+              ).map((opt) => (
+                <button
+                  key={opt.id}
+                  type="button"
+                  onClick={() => setApplyMode(opt.id)}
+                  className={`px-2.5 py-1.5 rounded-lg text-[11px] font-bold border cursor-pointer transition-all ${
+                    applyMode === opt.id
+                      ? "bg-indigo-500/20 border-indigo-400 text-indigo-200"
+                      : "bg-slate-900 border-slate-800 text-slate-400 hover:text-slate-200"
+                  }`}
+                >
+                  {opt.label}
+                </button>
+              ))}
+            </div>
+          </div>
 
           <div className="flex flex-wrap items-center gap-2.5">
             <button

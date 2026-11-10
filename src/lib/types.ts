@@ -88,6 +88,8 @@ export interface WorkoutSession {
   id: string;
   routineId: string;
   routineName: string;
+  blockId?: string; // Bloco semanal de origem
+  blockName?: string;
   date: string; // ISO string or YYYY-MM-DD
   startedAt: number; // timestamp ms
   finishedAt: number; // timestamp ms
@@ -98,10 +100,26 @@ export interface WorkoutSession {
   notes?: string;
 }
 
+/**
+ * Bloco semanal (mesociclo): um conjunto de fichas que representa uma semana-tipo.
+ * Pode estar ligado a uma divisão (splitType) ou ser totalmente personalizado.
+ */
+export interface TrainingBlock {
+  id: string;
+  name: string;
+  description?: string;
+  splitType?: string; // ex: "Upper / Lower". Undefined = bloco personalizado
+  routines: WorkoutRoutine[];
+  weeklyFrequency?: Record<string, number>; // routineId -> vezes por semana
+  createdAt: string;
+}
+
 export interface AppDatabase {
   profile: UserProfile;
   bodyLogs: BodyLog[];
-  routines: WorkoutRoutine[];
+  routines: WorkoutRoutine[]; // Espelho das fichas do bloco ativo (compatibilidade)
+  trainingBlocks?: TrainingBlock[];
+  activeBlockId?: string;
   workoutSessions: WorkoutSession[];
   updatedAt: string;
 }

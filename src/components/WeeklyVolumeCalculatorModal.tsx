@@ -4,6 +4,14 @@ import React, { useState } from "react";
 import { WorkoutRoutine } from "@/lib/types";
 import { MUSCLE_GROUPS } from "@/lib/exerciseCatalog";
 import {
+  computeWeeklyVolume,
+  getVolumeZone,
+  isCompoundExercise,
+  STIMULUS_PROFILES,
+  StimulusProfile,
+  TrainingStimulus,
+} from "@/lib/volume";
+import {
   Activity,
   AlertTriangle,
   BarChart3,
@@ -19,171 +27,19 @@ import {
   Zap,
 } from "lucide-react";
 
-export type TrainingStimulus = "hypertrophy" | "strength" | "endurance";
-
-interface StimulusProfile {
-  id: TrainingStimulus;
-  title: string;
-  subtitle: string;
-  minOptimalSets: number;
-  maxOptimalSets: number;
-  mevSets: number; // Minimum Effective Volume
-  recommendedRepsCompound: string;
-  recommendedRepsIsolation: string;
-  recommendedRestCompound: number;
-  recommendedRestIsolation: number;
-  description: string;
-}
-
-const STIMULUS_PROFILES: Record<TrainingStimulus, StimulusProfile> = {
-  hypertrophy: {
-    id: "hypertrophy",
-    title: "Hipertrofia (Ganho Muscular)",
-    subtitle: "Foco em tensão mecânica + volume moderado/alto",
-    mevSets: 6,
-    minOptimalSets: 10,
-    maxOptimalSets: 20,
-    recommendedRepsCompound: "6-10",
-    recommendedRepsIsolation: "10-15",
-    recommendedRestCompound: 120,
-    recommendedRestIsolation: 60,
-    description:
-      "Zona clássica científica (10 a 20 séries semanais por grupo muscular) trabalhando próximo da falha concêntrica (1 a 2 repetições na reserva).",
-  },
-  strength: {
-    id: "strength",
-    title: "Força Pura / Powerbuilding",
-    subtitle: "Cargas altas (80-90% 1RM) e recuperação neural",
-    mevSets: 4,
-    minOptimalSets: 6,
-    maxOptimalSets: 12,
-    recommendedRepsCompound: "3-6",
-    recommendedRepsIsolation: "6-10",
-    recommendedRestCompound: 180,
-    recommendedRestIsolation: 90,
-    description:
-      "Menos séries totais (6 a 12 séries pesadas) para evitar sobrecarga articular e do Sistema Nervoso Central, com descansos longos (3 min) nos básicos.",
-  },
-  endurance: {
-    id: "endurance",
-    title: "Resistência Muscular / Metabólico",
-    subtitle: "Altas repetições, densidade e condicionamento",
-    mevSets: 8,
-    minOptimalSets: 12,
-    maxOptimalSets: 22,
-    recommendedRepsCompound: "12-15",
-    recommendedRepsIsolation: "15-20",
-    recommendedRestCompound: 60,
-    recommendedRestIsolation: 45,
-    description:
-      "Maior tolerância a volume de séries com descansos curtos (45s a 60s), maximizando a capilarização, resistência local e gasto calórico.",
-  },
-};
-
-function normalizeMuscleGroup(raw: string): string {
-  const s = raw.toLowerCase();
-  if (s.includes("peito")) return "Peitoral";
-  if (s.includes("costas") || s.includes("dorsal") || s.includes("lombar"))
-    return "Costas";
-  if (s.includes("ombro") || s.includes("deltoide")) return "Ombros";
-  if (s.includes("quadr")) return "Quadríceps";
-  if (s.includes("posterior") || s.includes("isquio"))
-    return "Posterior de Coxa";
-  if (s.includes("glúteo") || s.includes("gluteo")) return "Glúteos";
-  if (s.includes("bíceps") || s.includes("biceps")) return "Bíceps";
-  if (s.includes("tríceps") || s.includes("triceps")) return "Tríceps";
-  if (s.includes("antebraço")) return "Antebraço";
-  if (s.includes("trapézio") || s.includes("trapezio")) return "Trapézio";
-  if (s.includes("panturrilha") || s.includes("gêmeos")) return "Panturrilha";
-  if (s.includes("abd") || s.includes("core")) return "Abdômen / Core";
-  return "Peitoral";
-}
-
-function getSynergistContributions(
-  exerciseName: string,
-  primaryGroup: string
-): { muscle: string; factor: number }[] {
-  const n = exerciseName.toLowerCase();
-
-  // Compound Horizontal/Vertical Presses
-  if (
-    n.includes("supino") ||
-    n.includes("paralela") ||
-    n.includes("flexão")
-  ) {
-    return [
-      { muscle: "Tríceps", factor: 0.5 },
-      { muscle: "Ombros", factor: 0.5 },
-    ];
-  }
-
-  // Compound Overhead Presses
-  if (n.includes("desenvolvimento") || n.includes("ohp") || n.includes("arnold")) {
-    return [{ muscle: "Tríceps", factor: 0.5 }];
-  }
-
-  // Compound Back Pulls & Rows
-  if (
-    n.includes("barra fixa") ||
-    n.includes("puxada") ||
-    n.includes("chin") ||
-    n.includes("remada") ||
-    n.includes("serrote") ||
-    n.includes("cavalinho")
-  ) {
-    return [
-      { muscle: "Bíceps", factor: 0.5 },
-      { muscle: "Ombros", factor: 0.35 },
-      { muscle: "Antebraço", factor: 0.35 },
-    ];
-  }
-
-  // Compound Lower Body Squats/Presses
-  if (
-    n.includes("agachamento") ||
-    n.includes("leg press") ||
-    n.includes("afundo") ||
-    n.includes("búlgaro") ||
-    n.includes("hack")
-  ) {
-    if (primaryGroup === "Quadríceps") {
-      return [{ muscle: "Glúteos", factor: 0.5 }];
-    }
-  }
-
-  // Hinges (Stiff / RDL / Terra)
-  if (n.includes("stiff") || n.includes("terra") || n.includes("rdl")) {
-    return [
-      { muscle: "Glúteos", factor: 0.5 },
-      { muscle: "Costas", factor: 0.35 },
-    ];
-  }
-
-  return [];
-}
-
-function isCompoundExercise(name: string): boolean {
-  const n = name.toLowerCase();
-  return (
-    n.includes("supino") ||
-    n.includes("agachamento") ||
-    n.includes("terra") ||
-    n.includes("stiff") ||
-    n.includes("rdl") ||
-    n.includes("remada") ||
-    n.includes("barra fixa") ||
-    n.includes("puxada") ||
-    n.includes("desenvolvimento") ||
-    n.includes("leg press") ||
-    n.includes("paralela")
-  );
-}
-
 interface WeeklyVolumeCalculatorModalProps {
   isOpen: boolean;
   onClose: () => void;
   routines: WorkoutRoutine[];
   onUpdateRoutines: (routines: WorkoutRoutine[]) => void;
+  blockName?: string;
+  weeklyFrequency: Record<string, number>;
+  onUpdateFrequency: (freq: Record<string, number>) => void;
+  stimulus: TrainingStimulus;
+  onStimulusChange: (s: TrainingStimulus) => void;
+  includeSynergists: boolean;
+  onIncludeSynergistsChange: (v: boolean) => void;
+  onOpenComparison?: () => void;
 }
 
 export function WeeklyVolumeCalculatorModal({
@@ -191,60 +47,36 @@ export function WeeklyVolumeCalculatorModal({
   onClose,
   routines,
   onUpdateRoutines,
+  blockName,
+  weeklyFrequency,
+  onUpdateFrequency,
+  stimulus,
+  onStimulusChange: setStimulus,
+  includeSynergists,
+  onIncludeSynergistsChange: setIncludeSynergists,
+  onOpenComparison,
 }: WeeklyVolumeCalculatorModalProps) {
   // Simple vs Enthusiast Mode
   const [showAdvanced, setShowAdvanced] = useState(false);
-  const [stimulus, setStimulus] = useState<TrainingStimulus>("hypertrophy");
-  const [includeSynergists, setIncludeSynergists] = useState(false);
-
-  // Per-routine weekly frequency multiplier (default 1x/week; e.g., set to 2x if running ABC 2x)
-  const [routineMultipliers, setRoutineMultipliers] = useState<
-    Record<string, number>
-  >({});
 
   if (!isOpen) return null;
 
   const profile = STIMULUS_PROFILES[stimulus];
 
   const getMultiplier = (routineId: string) =>
-    routineMultipliers[routineId] ?? 1;
+    weeklyFrequency[routineId] ?? 1;
 
-  // Calculate Direct and Indirect Sets per Muscle Group
-  const directMap: Record<string, number> = {};
-  const indirectMap: Record<string, number> = {};
-
-  MUSCLE_GROUPS.forEach((m) => {
-    directMap[m] = 0;
-    indirectMap[m] = 0;
-  });
-
-  routines.forEach((routine) => {
-    const mult = getMultiplier(routine.id);
-    routine.exercises.forEach((ex) => {
-      const primary = normalizeMuscleGroup(ex.muscleGroup);
-      const sets = ex.targetSets * mult;
-      directMap[primary] = (directMap[primary] || 0) + sets;
-
-      const synergists = getSynergistContributions(ex.name, primary);
-      synergists.forEach((syn) => {
-        if (syn.muscle !== primary) {
-          indirectMap[syn.muscle] =
-            (indirectMap[syn.muscle] || 0) + sets * syn.factor;
-        }
-      });
-    });
-  });
-
-  const totalDirectSetsWeek = Object.values(directMap).reduce(
-    (a, b) => a + b,
-    0
-  );
+  // Calculate Direct and Indirect Sets per Muscle Group (bloco ativo)
+  const volume = computeWeeklyVolume(routines, weeklyFrequency, false);
+  const directMap = volume.direct;
+  const indirectMap = volume.indirect;
+  const totalDirectSetsWeek = volume.totalDirectSets;
 
   // Apply stimulus preset to all routine exercises (reps & rest)
   const handleApplyStimulusToRoutines = () => {
     if (
       !confirm(
-        `Deseja ajustar automaticamente a Meta de Repetições e o Tempo de Descanso de todas as suas fichas para o perfil "${profile.title}"?`
+        `Deseja ajustar automaticamente a Meta de Repetições e o Tempo de Descanso de todas as fichas deste bloco para o perfil "${profile.title}"?`
       )
     ) {
       return;
@@ -283,7 +115,7 @@ export function WeeklyVolumeCalculatorModal({
                 Calculadora de Volume Semanal por Músculo
               </h2>
               <p className="text-xs text-slate-400">
-                Analisa suas fichas atuais e verifica se cada músculo está na
+                {blockName ? `Bloco: ${blockName} — ` : ""}Analisa as fichas do bloco ativo e verifica se cada músculo está na
                 zona ideal ({profile.minOptimalSets} a {profile.maxOptimalSets}{" "}
                 séries/semana)
               </p>
@@ -333,8 +165,8 @@ export function WeeklyVolumeCalculatorModal({
                             key={val}
                             type="button"
                             onClick={() =>
-                              setRoutineMultipliers({
-                                ...routineMultipliers,
+                              onUpdateFrequency({
+                                ...weeklyFrequency,
                                 [r.id]: val,
                               })
                             }
@@ -516,32 +348,10 @@ export function WeeklyVolumeCalculatorModal({
                   ? Number((direct + indirect).toFixed(1))
                   : direct;
 
-                let statusLabel = "Manutenção / Baixo";
-                let barColor = "bg-slate-600";
-                let badgeColor = "text-slate-400 bg-slate-800";
-
-                if (
-                  effective >= profile.minOptimalSets &&
-                  effective <= profile.maxOptimalSets
-                ) {
-                  statusLabel = "Zona Ideal";
-                  barColor = "bg-emerald-500";
-                  badgeColor =
-                    "text-emerald-300 bg-emerald-500/15 border border-emerald-500/30";
-                } else if (
-                  effective >= profile.mevSets &&
-                  effective < profile.minOptimalSets
-                ) {
-                  statusLabel = "Volume Mínimo (MEV)";
-                  barColor = "bg-amber-400";
-                  badgeColor =
-                    "text-amber-300 bg-amber-500/15 border border-amber-500/30";
-                } else if (effective > profile.maxOptimalSets) {
-                  statusLabel = "Volume Alto / Excesso";
-                  barColor = "bg-rose-500";
-                  badgeColor =
-                    "text-rose-300 bg-rose-500/15 border border-rose-500/30";
-                }
+                const zoneStyle = getVolumeZone(effective, profile);
+                const statusLabel = zoneStyle.label;
+                const barColor = zoneStyle.barColor;
+                const badgeColor = zoneStyle.badgeColor;
 
                 const maxScale = profile.maxOptimalSets + 6;
                 const pct = Math.min(100, (effective / maxScale) * 100);
@@ -608,13 +418,24 @@ export function WeeklyVolumeCalculatorModal({
               diretas.
             </span>
           </span>
-          <button
-            type="button"
-            onClick={onClose}
-            className="bg-slate-800 hover:bg-slate-700 text-white font-bold px-4 py-2 rounded-xl cursor-pointer shrink-0"
-          >
-            Fechar
-          </button>
+          <div className="flex items-center gap-2 shrink-0">
+            {onOpenComparison && (
+              <button
+                type="button"
+                onClick={onOpenComparison}
+                className="bg-indigo-500/15 hover:bg-indigo-500/25 border border-indigo-500/40 text-indigo-300 font-bold px-4 py-2 rounded-xl cursor-pointer"
+              >
+                Comparar Blocos
+              </button>
+            )}
+            <button
+              type="button"
+              onClick={onClose}
+              className="bg-slate-800 hover:bg-slate-700 text-white font-bold px-4 py-2 rounded-xl cursor-pointer shrink-0"
+            >
+              Fechar
+            </button>
+          </div>
         </div>
       </div>
     </div>
