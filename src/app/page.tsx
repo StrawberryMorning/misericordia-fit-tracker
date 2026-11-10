@@ -222,8 +222,20 @@ export default function HomePage() {
     <div className="min-h-screen flex flex-col md:flex-row bg-slate-950 text-slate-100">
       {/* Desktop Left Sidebar */}
       <aside className="hidden md:flex md:w-64 md:flex-col md:fixed md:inset-y-0 bg-slate-900/95 border-r border-slate-800 p-5 justify-between">
-        <div className="space-y-8">
+        <div className="space-y-6">
           <div>
+            {/* Assinatura Trademark: Manhã de Morango S/A */}
+            <div className="flex items-center gap-2 mb-3 px-2 py-1 rounded-lg bg-rose-500/10 border border-rose-500/20 w-fit">
+              <img
+                src="/strawberry-elephant.jpg"
+                alt="Manhã de Morango S/A"
+                className="w-5 h-5 rounded-full object-cover border border-rose-400/40 shadow-sm shrink-0"
+              />
+              <span className="text-[11px] font-extrabold tracking-wide text-rose-300">
+                Manhã de Morango S/A
+              </span>
+            </div>
+
             <div className="flex items-center justify-between gap-2.5">
               <div className="flex items-center gap-2.5">
                 <div className="w-9 h-9 rounded-xl bg-sky-500 flex items-center justify-center text-slate-950 font-black text-lg shadow-lg shadow-sky-500/30">
@@ -354,13 +366,23 @@ export default function HomePage() {
       {/* Main Content Area */}
       <main className="flex-1 md:pl-64 pb-24 md:pb-10">
         {/* Top Mobile Header */}
-        <header className="md:hidden flex items-center justify-between px-4 py-3.5 bg-slate-900 border-b border-slate-800">
+        <header className="md:hidden flex items-center justify-between px-4 py-3 bg-slate-900 border-b border-slate-800">
           <div className="flex items-center gap-2">
-            <div className="w-7 h-7 rounded-lg bg-sky-500 flex items-center justify-center text-slate-950 font-black text-xs">
+            <div className="w-7 h-7 rounded-lg bg-sky-500 flex items-center justify-center text-slate-950 font-black text-xs shrink-0">
               BB
             </div>
             <div>
-              <h1 className="text-sm font-black uppercase tracking-wider text-white">
+              <div className="flex items-center gap-1.5 leading-none">
+                <img
+                  src="/strawberry-elephant.jpg"
+                  alt="Manhã de Morango S/A"
+                  className="w-3.5 h-3.5 rounded-full object-cover border border-rose-400/40 shrink-0"
+                />
+                <span className="text-[10px] font-bold text-rose-300">
+                  Manhã de Morango S/A
+                </span>
+              </div>
+              <h1 className="text-xs font-black uppercase tracking-wider text-white mt-0.5">
                 Brass Bell 2.0
               </h1>
             </div>
@@ -430,6 +452,21 @@ export default function HomePage() {
               onUpdateProfile={handleUpdateProfile}
             />
           )}
+
+          {/* Rodapé sutil de marca */}
+          <footer className="mt-12 pt-6 border-t border-slate-800/60 flex flex-wrap items-center justify-between gap-3 text-xs text-slate-500">
+            <div className="flex items-center gap-2">
+              <img
+                src="/strawberry-elephant.jpg"
+                alt="Manhã de Morango S/A"
+                className="w-4 h-4 rounded-full object-cover border border-rose-400/30 opacity-80"
+              />
+              <span className="font-semibold text-slate-400">
+                Manhã de Morango S/A
+              </span>
+            </div>
+            <span>Brass Bell 2.0 • Biomechanics & Body Evolution</span>
+          </footer>
         </div>
       </main>
 
