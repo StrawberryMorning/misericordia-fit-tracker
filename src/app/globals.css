@@ -10,3 +10,9 @@ body {
   background-color: #020617;
   color: #f1f5f9;
 }
+
+/* Modo Preto e Branco (Monocromático) */
+html.monochrome {
+  filter: grayscale(100%);
+}
+

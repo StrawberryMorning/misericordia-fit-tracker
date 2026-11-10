@@ -18,13 +18,17 @@ import {
   Cloud,
   Download,
   Dumbbell,
+  Eye,
   LayoutDashboard,
+  Moon,
   RotateCcw,
   Ruler,
+  Sun,
   Upload,
 } from "lucide-react";
 
 const LOCAL_STORAGE_KEY = "brass_bell_v2_db_clean";
+const THEME_STORAGE_KEY = "brass_bell_theme_mode";
 
 export default function HomePage() {
   const [activeTab, setActiveTab] = useState<"dashboard" | "workout" | "body">(
@@ -36,6 +40,34 @@ export default function HomePage() {
   const [syncStatus, setSyncStatus] = useState<
     "synced" | "syncing" | "offline"
   >("synced");
+  const [isMonochrome, setIsMonochrome] = useState<boolean>(false);
+
+  // Inicialização do modo Preto e Branco (Respeitando default do sistema e preferência salva)
+  useEffect(() => {
+    const saved = localStorage.getItem(THEME_STORAGE_KEY);
+    if (saved !== null) {
+      const isMono = saved === "monochrome";
+      setIsMonochrome(isMono);
+      document.documentElement.classList.toggle("monochrome", isMono);
+    } else {
+      // Default pelo sistema: se o usuário no sistema prefere alto contraste / monochrome (monochrome media query)
+      const systemPrefersMono =
+        window.matchMedia &&
+        (window.matchMedia("(monochrome)").matches ||
+          window.matchMedia("(forced-colors: active)").matches);
+      setIsMonochrome(Boolean(systemPrefersMono));
+      document.documentElement.classList.toggle("monochrome", Boolean(systemPrefersMono));
+    }
+  }, []);
+
+  const toggleMonochrome = () => {
+    setIsMonochrome((prev) => {
+      const next = !prev;
+      localStorage.setItem(THEME_STORAGE_KEY, next ? "monochrome" : "default");
+      document.documentElement.classList.toggle("monochrome", next);
+      return next;
+    });
+  };
 
   // Load initial data from Server API (/api/sync) + LocalStorage fallback
   useEffect(() => {
@@ -193,18 +225,37 @@ export default function HomePage() {
       <aside className="hidden md:flex md:w-64 md:flex-col md:fixed md:inset-y-0 bg-slate-900/95 border-r border-slate-800 p-5 justify-between">
         <div className="space-y-8">
           <div>
-            <div className="flex items-center gap-2.5">
-              <div className="w-9 h-9 rounded-xl bg-sky-500 flex items-center justify-center text-slate-950 font-black text-lg shadow-lg shadow-sky-500/30">
-                BB
+            <div className="flex items-center justify-between gap-2.5">
+              <div className="flex items-center gap-2.5">
+                <div className="w-9 h-9 rounded-xl bg-sky-500 flex items-center justify-center text-slate-950 font-black text-lg shadow-lg shadow-sky-500/30">
+                  BB
+                </div>
+                <div>
+                  <h1 className="text-base font-black uppercase tracking-widest text-white">
+                    Brass Bell
+                  </h1>
+                  <p className="text-[11px] text-sky-400 font-semibold">
+                    Fit & Body Tracker 2.0
+                  </p>
+                </div>
               </div>
-              <div>
-                <h1 className="text-base font-black uppercase tracking-widest text-white">
-                  Brass Bell
-                </h1>
-                <p className="text-[11px] text-sky-400 font-semibold">
-                  Fit & Body Tracker 2.0
-                </p>
-              </div>
+
+              {/* Botão Sutil de Modo Preto e Branco */}
+              <button
+                type="button"
+                onClick={toggleMonochrome}
+                title={isMonochrome ? "Ativar Modo Colorido" : "Ativar Modo Preto e Branco"}
+                className={`p-2 rounded-xl border transition-all cursor-pointer ${
+                  isMonochrome
+                    ? "bg-white text-slate-950 border-white shadow-sm"
+                    : "bg-slate-950/60 border-slate-800 text-slate-400 hover:text-slate-200 hover:border-slate-700"
+                }`}
+              >
+                <div className="w-4 h-4 rounded-full border border-current flex overflow-hidden">
+                  <span className="w-1/2 h-full bg-current" />
+                  <span className="w-1/2 h-full" />
+                </div>
+              </button>
             </div>
           </div>
 
@@ -320,6 +371,21 @@ export default function HomePage() {
           </div>
 
           <div className="flex items-center gap-2">
+            <button
+              type="button"
+              onClick={toggleMonochrome}
+              title={isMonochrome ? "Ativar Modo Colorido" : "Ativar Modo Preto e Branco"}
+              className={`p-1.5 rounded-lg border text-xs flex items-center justify-center ${
+                isMonochrome
+                  ? "bg-white text-slate-950 border-white"
+                  : "bg-slate-950/60 border-slate-800 text-slate-400"
+              }`}
+            >
+              <div className="w-3.5 h-3.5 rounded-full border border-current flex overflow-hidden">
+                <span className="w-1/2 h-full bg-current" />
+                <span className="w-1/2 h-full" />
+              </div>
+            </button>
             <button
               type="button"
               onClick={handleResetAllData}
