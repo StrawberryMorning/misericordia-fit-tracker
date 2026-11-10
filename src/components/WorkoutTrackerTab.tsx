@@ -12,6 +12,7 @@ import { generateId } from "@/lib/trainingBlocks";
 import { TrainingStimulus } from "@/lib/volume";
 import { TrainingBlockBar } from "./TrainingBlockBar";
 import { BlockComparisonModal } from "./BlockComparisonModal";
+import { WorkoutCalendar } from "./WorkoutCalendar";
 import { calculateEstimated1RM } from "@/lib/formulas";
 import {
   SplitApplyMode,
@@ -34,6 +35,7 @@ import {
   BarChart3,
   BookOpen,
   Brain,
+  Calendar,
   Check,
   ChevronDown,
   ChevronUp,
@@ -152,6 +154,7 @@ export function WorkoutTrackerTab({
   const [newExRest, setNewExRest] = useState("90");
 
   // New Routine Modal/State
+  const [historyView, setHistoryView] = useState<"calendar" | "list">("calendar");
   const [newRoutineName, setNewRoutineName] = useState("");
   const [newRoutineDesc, setNewRoutineDesc] = useState("");
   const [isSplitGuideOpen, setIsSplitGuideOpen] = useState(false);
@@ -1577,65 +1580,97 @@ export function WorkoutTrackerTab({
         </form>
 
         {/* Histórico de Sessões Realizadas */}
-        <div className="lg:col-span-7 bg-slate-900/90 border border-slate-800 rounded-2xl p-5 space-y-4">
-          <div className="flex items-center justify-between">
+        <div className="lg:col-span-7 space-y-4">
+          <div className="flex flex-wrap items-center justify-between gap-2 bg-slate-900/90 border border-slate-800 rounded-2xl p-3.5">
             <div className="flex items-center gap-2 text-sky-400 font-bold text-sm uppercase tracking-wider">
               <Flame className="w-4 h-4" />
-              <span>Histórico de Treinos Concluídos ({sessions.length})</span>
+              <span>Histórico de Treinos ({sessions.length})</span>
+            </div>
+
+            <div className="flex items-center gap-1 bg-slate-950 p-1 rounded-xl border border-slate-800">
+              <button
+                type="button"
+                onClick={() => setHistoryView("calendar")}
+                className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-bold transition-all cursor-pointer ${
+                  historyView === "calendar"
+                    ? "bg-sky-500 text-slate-950 shadow-md shadow-sky-500/20"
+                    : "text-slate-400 hover:text-white"
+                }`}
+              >
+                <Calendar className="w-3.5 h-3.5" />
+                <span>Calendário</span>
+              </button>
+              <button
+                type="button"
+                onClick={() => setHistoryView("list")}
+                className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-bold transition-all cursor-pointer ${
+                  historyView === "list"
+                    ? "bg-sky-500 text-slate-950 shadow-md shadow-sky-500/20"
+                    : "text-slate-400 hover:text-white"
+                }`}
+              >
+                <span>Lista</span>
+              </button>
             </div>
           </div>
 
-          {sessions.length === 0 ? (
-            <p className="text-sm text-slate-500 py-8 text-center">
-              Nenhum treino registrado ainda. Clique em &ldquo;Iniciar Treino Ao
-              Vivo&rdquo; acima!
-            </p>
+          {historyView === "calendar" ? (
+            <WorkoutCalendar sessions={sessions} />
           ) : (
-            <div className="space-y-3">
-              {sessions
-                .slice()
-                .reverse()
-                .map((sess) => (
-                  <div
-                    key={sess.id}
-                    className="bg-slate-950/80 border border-slate-800 rounded-xl p-4 flex flex-wrap items-center justify-between gap-4"
-                  >
-                    <div>
-                      <div className="text-xs text-slate-400 font-mono">
-                        {sess.date} • Duração:{" "}
-                        <strong className="text-sky-400">
-                          {formatDuration(sess.durationSeconds)}
-                        </strong>
+            <div className="bg-slate-900/90 border border-slate-800 rounded-2xl p-5 space-y-4">
+              {sessions.length === 0 ? (
+                <p className="text-sm text-slate-500 py-8 text-center">
+                  Nenhum treino registrado ainda. Clique em &ldquo;Iniciar Treino Ao
+                  Vivo&rdquo; acima!
+                </p>
+              ) : (
+                <div className="space-y-3">
+                  {sessions
+                    .slice()
+                    .reverse()
+                    .map((sess) => (
+                      <div
+                        key={sess.id}
+                        className="bg-slate-950/80 border border-slate-800 rounded-xl p-4 flex flex-wrap items-center justify-between gap-4"
+                      >
+                        <div>
+                          <div className="text-xs text-slate-400 font-mono">
+                            {sess.date} • Duração:{" "}
+                            <strong className="text-sky-400">
+                              {formatDuration(sess.durationSeconds)}
+                            </strong>
+                          </div>
+                          <div className="text-sm font-bold text-white mt-0.5">
+                            {sess.routineName}
+                          </div>
+                          {sess.blockName && (
+                            <span className="inline-block mt-1 text-[10px] font-semibold bg-indigo-500/15 text-indigo-300 border border-indigo-500/25 px-2 py-0.5 rounded-full">
+                              Bloco: {sess.blockName}
+                            </span>
+                          )}
+                          <div className="text-xs text-slate-400 mt-1">
+                            Séries concluídas:{" "}
+                            <strong className="text-emerald-400">
+                              {sess.completedSetsCount}
+                            </strong>{" "}
+                            • Volume Total:{" "}
+                            <strong className="text-amber-300">
+                              {sess.totalVolumeKg} kg
+                            </strong>
+                          </div>
+                        </div>
+                        <button
+                          type="button"
+                          onClick={() => onDeleteSession(sess.id)}
+                          className="text-slate-500 hover:text-rose-400 p-1.5"
+                          title="Apagar sessão"
+                        >
+                          <Trash2 className="w-4 h-4" />
+                        </button>
                       </div>
-                      <div className="text-sm font-bold text-white mt-0.5">
-                        {sess.routineName}
-                      </div>
-                      {sess.blockName && (
-                        <span className="inline-block mt-1 text-[10px] font-semibold bg-indigo-500/15 text-indigo-300 border border-indigo-500/25 px-2 py-0.5 rounded-full">
-                          Bloco: {sess.blockName}
-                        </span>
-                      )}
-                      <div className="text-xs text-slate-400 mt-1">
-                        Séries concluídas:{" "}
-                        <strong className="text-emerald-400">
-                          {sess.completedSetsCount}
-                        </strong>{" "}
-                        • Volume Total:{" "}
-                        <strong className="text-amber-300">
-                          {sess.totalVolumeKg} kg
-                        </strong>
-                      </div>
-                    </div>
-                    <button
-                      type="button"
-                      onClick={() => onDeleteSession(sess.id)}
-                      className="text-slate-500 hover:text-rose-400 p-1.5"
-                      title="Apagar sessão"
-                    >
-                      <Trash2 className="w-4 h-4" />
-                    </button>
-                  </div>
-                ))}
+                    ))}
+                </div>
+              )}
             </div>
           )}
         </div>
