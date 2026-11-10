@@ -44,37 +44,37 @@ export function BodyTrackerTab({
 
   const [date, setDate] = useState(todayStr);
   const [weightKg, setWeightKg] = useState<string>(
-    latestLog ? String(latestLog.weightKg) : "75.0"
+    latestLog ? String(latestLog.weightKg) : ""
   );
   const [selectedMethod, setSelectedMethod] = useState<BFMethod>("navy");
   const [manualBf, setManualBf] = useState<string>(
-    latestLog ? String(latestLog.bfPercent) : "15.0"
+    latestLog ? String(latestLog.bfPercent) : ""
   );
   const [notes, setNotes] = useState("");
 
   // Circumferences (cm)
   const [circ, setCirc] = useState<Circumferences>({
-    neck: latestLog?.circumferences.neck ?? 40,
-    shoulders: latestLog?.circumferences.shoulders ?? 121,
-    chest: latestLog?.circumferences.chest ?? 103,
-    armRight: latestLog?.circumferences.armRight ?? 38.5,
-    armLeft: latestLog?.circumferences.armLeft ?? 38.0,
-    forearm: latestLog?.circumferences.forearm ?? 30.5,
-    waist: latestLog?.circumferences.waist ?? 82,
-    hips: latestLog?.circumferences.hips ?? 96,
-    thighRight: latestLog?.circumferences.thighRight ?? 59,
-    calf: latestLog?.circumferences.calf ?? 39,
+    neck: latestLog?.circumferences.neck,
+    shoulders: latestLog?.circumferences.shoulders,
+    chest: latestLog?.circumferences.chest,
+    armRight: latestLog?.circumferences.armRight,
+    armLeft: latestLog?.circumferences.armLeft,
+    forearm: latestLog?.circumferences.forearm,
+    waist: latestLog?.circumferences.waist,
+    hips: latestLog?.circumferences.hips,
+    thighRight: latestLog?.circumferences.thighRight,
+    calf: latestLog?.circumferences.calf,
   });
 
   // Skinfolds (mm)
   const [folds, setFolds] = useState<Skinfolds>({
-    chest: latestLog?.skinfolds?.chest ?? 10,
-    abdomen: latestLog?.skinfolds?.abdomen ?? 18,
-    thigh: latestLog?.skinfolds?.thigh ?? 14,
-    triceps: latestLog?.skinfolds?.triceps ?? 10,
-    subscapular: latestLog?.skinfolds?.subscapular ?? 13,
-    suprailiac: latestLog?.skinfolds?.suprailiac ?? 14,
-    midaxillary: latestLog?.skinfolds?.midaxillary ?? 11,
+    chest: latestLog?.skinfolds?.chest,
+    abdomen: latestLog?.skinfolds?.abdomen,
+    thigh: latestLog?.skinfolds?.thigh,
+    triceps: latestLog?.skinfolds?.triceps,
+    subscapular: latestLog?.skinfolds?.subscapular,
+    suprailiac: latestLog?.skinfolds?.suprailiac,
+    midaxillary: latestLog?.skinfolds?.midaxillary,
   });
 
   // Live BF% Calculations across all 3 methods
@@ -108,7 +108,7 @@ export function BodyTrackerTab({
       return pollock3Result;
     if (selectedMethod === "pollock7" && pollock7Result !== null)
       return pollock7Result;
-    return parseFloat(manualBf) || 15;
+    return parseFloat(manualBf) || 0;
   })();
 
   const parsedWeight = parseFloat(weightKg) || 0;

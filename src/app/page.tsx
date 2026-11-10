@@ -17,11 +17,12 @@ import {
   Download,
   Dumbbell,
   LayoutDashboard,
+  RotateCcw,
   Ruler,
   Upload,
 } from "lucide-react";
 
-const LOCAL_STORAGE_KEY = "brass_bell_v2_db";
+const LOCAL_STORAGE_KEY = "brass_bell_v2_db_clean";
 
 export default function HomePage() {
   const [activeTab, setActiveTab] = useState<"dashboard" | "workout" | "body">(
@@ -118,6 +119,18 @@ export default function HomePage() {
 
   const handleUpdateRoutines = (routines: WorkoutRoutine[]) => {
     persistDatabase({ ...db, routines });
+  };
+
+  const handleResetAllData = () => {
+    if (
+      confirm(
+        "Tem certeza que deseja zerar todo o histórico de medidas e sessões de treino?"
+      )
+    ) {
+      localStorage.removeItem("brass_bell_v2_db");
+      localStorage.removeItem(LOCAL_STORAGE_KEY);
+      persistDatabase(DEFAULT_DATABASE);
+    }
   };
 
   // JSON Backup Export & Import
@@ -258,6 +271,14 @@ export default function HomePage() {
               />
             </label>
           </div>
+          <button
+            type="button"
+            onClick={handleResetAllData}
+            className="w-full flex items-center justify-center gap-1.5 bg-rose-950/40 hover:bg-rose-900/50 border border-rose-800/40 text-rose-300 text-xs font-semibold py-2 rounded-lg cursor-pointer transition-colors"
+          >
+            <RotateCcw className="w-3.5 h-3.5" />
+            <span>Zerar Histórico</span>
+          </button>
         </div>
       </aside>
 
@@ -277,6 +298,14 @@ export default function HomePage() {
           </div>
 
           <div className="flex items-center gap-2">
+            <button
+              type="button"
+              onClick={handleResetAllData}
+              className="text-xs bg-rose-950/50 border border-rose-800/50 px-2.5 py-1.5 rounded-lg text-rose-300 flex items-center gap-1"
+            >
+              <RotateCcw className="w-3.5 h-3.5" />
+              Zerar
+            </button>
             <button
               type="button"
               onClick={handleExportBackup}
