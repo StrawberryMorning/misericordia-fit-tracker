@@ -1,0 +1,286 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Brass Bell Tracker</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <meta name="theme-color" content="#0f172a">
+    
+    <style>
+        .tab-active { border-bottom: 2px solid #0ea5e9; color: #0ea5e9; }
+        .tab-inactive { color: #94a3b8; }
+    </style>
+</head>
+<body class="bg-slate-900 text-slate-200 min-h-screen p-4 font-sans">
+    <div class="max-w-md mx-auto bg-slate-800 rounded-xl shadow-2xl overflow-hidden border border-slate-700">
+        
+        <!-- Cabeçalho -->
+        <div class="bg-slate-900 p-6 text-center border-b border-slate-700">
+            <h1 class="text-2xl font-bold text-sky-400 uppercase tracking-widest">Brass Bell</h1>
+            <p class="text-xs text-slate-400 mt-1 tracking-wider">Evolution Tracker</p>
+        </div>
+
+        <!-- Navegação de Abas -->
+        <div class="flex border-b border-slate-700 text-sm">
+            <button id="tab-dashboard" class="flex-1 py-3 text-center font-medium tab-active transition-colors" onclick="switchTab('dashboard')">Gráficos</button>
+            <button id="tab-log" class="flex-1 py-3 text-center font-medium tab-inactive transition-colors" onclick="switchTab('log')">Nova Medida</button>
+            <button id="tab-navy" class="flex-1 py-3 text-center font-medium tab-inactive transition-colors" onclick="switchTab('navy')">Cálculo BF%</button>
+        </div>
+
+        <div class="p-6">
+            <!-- ABA 1: DASHBOARD & GRÁFICOS -->
+            <div id="dashboard-section" class="block space-y-6">
+                <div>
+                    <h2 class="text-sm font-bold text-slate-400 uppercase tracking-wider mb-4 text-center">Peso Bruto vs Massa Magra (kg)</h2>
+                    <canvas id="evolutionChart" class="w-full h-64 bg-slate-900 rounded-lg p-2 border border-slate-700"></canvas>
+                </div>
+                
+                <!-- Histórico Recente -->
+                <div class="bg-slate-900 rounded-lg border border-slate-700 p-4">
+                    <h3 class="text-xs font-bold text-sky-400 uppercase mb-3 border-b border-slate-700 pb-2">Últimos Registros</h3>
+                    <ul id="history-list" class="space-y-2 text-sm text-slate-300">
+                        <!-- Preenchido via JS -->
+                    </ul>
+                </div>
+                <button onclick="clearData()" class="w-full py-2 text-xs text-red-400 border border-red-900 rounded hover:bg-red-900/30 transition-colors">Apagar Histórico</button>
+            </div>
+
+            <!-- ABA 2: NOVA MEDIDA -->
+            <div id="log-section" class="hidden space-y-4">
+                <div class="bg-slate-900 p-4 rounded-lg border border-slate-700 space-y-4">
+                    <div>
+                        <label class="block text-sm font-medium text-slate-400 mb-1">Data</label>
+                        <input type="date" id="log-date" class="w-full bg-slate-800 border border-slate-600 rounded p-2 text-slate-200 focus:border-sky-500 outline-none">
+                    </div>
+                    <div class="grid grid-cols-2 gap-4">
+                        <div>
+                            <label class="block text-sm font-medium text-slate-400 mb-1">Peso (kg)</label>
+                            <input type="number" id="log-weight" step="0.1" class="w-full bg-slate-800 border border-slate-600 rounded p-2 text-slate-200">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-slate-400 mb-1">BF (%)</label>
+                            <input type="number" id="log-bf" step="0.1" class="w-full bg-slate-800 border border-slate-600 rounded p-2 text-slate-200">
+                        </div>
+                    </div>
+                </div>
+
+                <div class="bg-slate-900 p-4 rounded-lg border border-slate-700 space-y-4">
+                    <h3 class="text-xs font-bold text-sky-400 uppercase">Medidas Físicas (cm)</h3>
+                    <div class="grid grid-cols-2 gap-4">
+                        <div>
+                            <label class="block text-xs text-slate-400 mb-1">Ombros</label>
+                            <input type="number" id="log-shoulders" class="w-full bg-slate-800 border border-slate-600 rounded p-2 text-slate-200">
+                        </div>
+                        <div>
+                            <label class="block text-xs text-slate-400 mb-1">Cintura</label>
+                            <input type="number" id="log-waist" class="w-full bg-slate-800 border border-slate-600 rounded p-2 text-slate-200">
+                        </div>
+                        <div>
+                            <label class="block text-xs text-slate-400 mb-1">Coxa</label>
+                            <input type="number" id="log-thigh" class="w-full bg-slate-800 border border-slate-600 rounded p-2 text-slate-200">
+                        </div>
+                    </div>
+                </div>
+                
+                <button onclick="saveLog()" class="w-full bg-sky-600 hover:bg-sky-500 text-white font-bold py-3 rounded-lg transition-colors shadow-lg shadow-sky-900/50">
+                    Salvar no Diário
+                </button>
+            </div>
+
+            <!-- ABA 3: MÉTODO US NAVY -->
+            <div id="navy-section" class="hidden space-y-5">
+                <div class="bg-slate-900 p-4 rounded-lg border border-slate-700">
+                    <p class="text-xs text-slate-400 mb-4">O método da Marinha Americana estima a densidade corporal através da relação geométrica entre a sua altura e as circunferências do pescoço e cintura.</p>
+                    
+                    <div class="space-y-4">
+                        <div class="grid grid-cols-2 gap-4">
+                            <div>
+                                <label class="block text-sm font-medium text-slate-400 mb-1">Altura (cm)</label>
+                                <input type="number" id="navy-height" value="169" class="w-full bg-slate-800 border border-slate-600 rounded p-2 text-slate-200">
+                            </div>
+                            <div>
+                                <label class="block text-sm font-medium text-slate-400 mb-1">Idade</label>
+                                <input type="number" id="navy-age" value="21" class="w-full bg-slate-800 border border-slate-600 rounded p-2 text-slate-200">
+                            </div>
+                        </div>
+                        <div class="grid grid-cols-2 gap-4">
+                            <div>
+                                <label class="block text-sm font-medium text-slate-400 mb-1">Pescoço (cm)</label>
+                                <input type="number" id="navy-neck" placeholder="Ex: 40" class="w-full bg-slate-800 border border-slate-600 rounded p-2 text-slate-200" oninput="calculateNavy()">
+                            </div>
+                            <div>
+                                <label class="block text-sm font-medium text-slate-400 mb-1">Cintura (cm)</label>
+                                <input type="number" id="navy-waist" placeholder="Ex: 88.5" class="w-full bg-slate-800 border border-slate-600 rounded p-2 text-slate-200" oninput="calculateNavy()">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="p-6 bg-slate-900 rounded-xl border border-sky-900/50 text-center">
+                    <h2 class="text-sm font-bold text-slate-400 uppercase tracking-wider mb-2">BF Estimado (Marinha)</h2>
+                    <div class="flex justify-center items-end space-x-2">
+                        <span id="navy-result" class="text-5xl font-extrabold text-sky-400">0.0</span>
+                        <span class="text-xl text-slate-500 pb-1">%</span>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+    <script>
+        let chartInstance = null;
+
+        // Controle de Abas
+        function switchTab(tab) {
+            document.querySelectorAll('[id^="tab-"]').forEach(btn => btn.className = 'flex-1 py-3 text-center font-medium tab-inactive transition-colors');
+            document.getElementById('tab-' + tab).className = 'flex-1 py-3 text-center font-medium tab-active transition-colors';
+            
+            document.getElementById('dashboard-section').style.display = tab === 'dashboard' ? 'block' : 'none';
+            document.getElementById('log-section').style.display = tab === 'log' ? 'block' : 'none';
+            document.getElementById('navy-section').style.display = tab === 'navy' ? 'block' : 'none';
+        }
+
+        // Definir data de hoje no input
+        document.getElementById('log-date').valueAsDate = new Date();
+
+        // Salvar dados no LocalStorage
+        function saveLog() {
+            const date = document.getElementById('log-date').value;
+            const weight = parseFloat(document.getElementById('log-weight').value);
+            const bf = parseFloat(document.getElementById('log-bf').value);
+            
+            if(!date || isNaN(weight) || isNaN(bf)) {
+                alert("Preencha Data, Peso e BF% pelo menos.");
+                return;
+            }
+
+            const lbm = weight * (1 - (bf / 100)); // Calcula Massa Magra
+
+            const newEntry = {
+                date: date,
+                weight: weight,
+                bf: bf,
+                lbm: parseFloat(lbm.toFixed(2)),
+                shoulders: document.getElementById('log-shoulders').value || null,
+                waist: document.getElementById('log-waist').value || null,
+                thigh: document.getElementById('log-thigh').value || null
+            };
+
+            let logs = JSON.parse(localStorage.getItem('brassBellLogs')) || [];
+            logs.push(newEntry);
+            
+            // Ordenar por data
+            logs.sort((a, b) => new Date(a.date) - new Date(b.date));
+            
+            localStorage.setItem('brassBellLogs', JSON.stringify(logs));
+            
+            // Limpa o formulário parcial
+            document.getElementById('log-weight').value = '';
+            
+            switchTab('dashboard');
+            loadDashboard();
+        }
+
+        // Carregar Gráfico e Histórico
+        function loadDashboard() {
+            const logs = JSON.parse(localStorage.getItem('brassBellLogs')) || [];
+            
+            // Renderizar Lista Recente
+            const listEl = document.getElementById('history-list');
+            listEl.innerHTML = '';
+            
+            if(logs.length === 0) {
+                listEl.innerHTML = '<li class="text-slate-500 text-center">Nenhum registro ainda.</li>';
+            } else {
+                // Pega os 3 últimos revertidos
+                logs.slice(-3).reverse().forEach(log => {
+                    listEl.innerHTML += `<li class="flex justify-between border-b border-slate-800 pb-1">
+                        <span>${log.date}</span>
+                        <span class="text-sky-400 font-bold">${log.weight} kg <span class="text-slate-500 text-xs">(${log.bf}%)</span></span>
+                    </li>`;
+                });
+            }
+
+            // Preparar dados pro Chart.js
+            const labels = logs.map(l => l.date.substring(5)); // Pega só MM-DD
+            const weightData = logs.map(l => l.weight);
+            const lbmData = logs.map(l => l.lbm);
+
+            const ctx = document.getElementById('evolutionChart').getContext('2d');
+            
+            if(chartInstance) {
+                chartInstance.destroy();
+            }
+
+            chartInstance = new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: labels,
+                    datasets: [
+                        {
+                            label: 'Peso Bruto',
+                            data: weightData,
+                            borderColor: '#94a3b8',
+                            backgroundColor: 'transparent',
+                            borderWidth: 2,
+                            tension: 0.3
+                        },
+                        {
+                            label: 'Massa Magra (LBM)',
+                            data: lbmData,
+                            borderColor: '#0ea5e9',
+                            backgroundColor: 'rgba(14, 165, 233, 0.1)',
+                            borderWidth: 2,
+                            fill: true,
+                            tension: 0.3
+                        }
+                    ]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: { labels: { color: '#cbd5e1' } }
+                    },
+                    scales: {
+                        x: { ticks: { color: '#64748b' }, grid: { display: false } },
+                        y: { ticks: { color: '#64748b' }, grid: { color: '#334155' } }
+                    }
+                }
+            });
+        }
+
+        // Calculadora US Navy (Fórmula para Homens)
+        function calculateNavy() {
+            const h = parseFloat(document.getElementById('navy-height').value);
+            const n = parseFloat(document.getElementById('navy-neck').value);
+            const w = parseFloat(document.getElementById('navy-waist').value);
+
+            if(h > 0 && n > 0 && w > n) {
+                // Fórmula US Navy em cm
+                // BF = 495 / (1.0324 - 0.19077 * log10(waist - neck) + 0.15456 * log10(height)) - 450
+                const logAbNeck = Math.log10(w - n);
+                const logHeight = Math.log10(h);
+                
+                const d = 1.0324 - (0.19077 * logAbNeck) + (0.15456 * logHeight);
+                const bf = (495 / d) - 450;
+                
+                document.getElementById('navy-result').innerText = bf.toFixed(1);
+            }
+        }
+
+        function clearData() {
+            if(confirm('Tem certeza? Isso apaga todo o histórico no navegador.')) {
+                localStorage.removeItem('brassBellLogs');
+                loadDashboard();
+            }
+        }
+
+        // Inicializar
+        document.addEventListener('DOMContentLoaded', loadDashboard);
+    </script>
+</body>
+</html>

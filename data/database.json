@@ -1,0 +1,298 @@
+{
+  "profile": {
+    "name": "Atleta Brass Bell",
+    "heightCm": 169,
+    "age": 21,
+    "sex": "male"
+  },
+  "bodyLogs": [
+    {
+      "id": "seed-1",
+      "date": "2026-10-01",
+      "weightKg": 76.5,
+      "bfPercent": 17.8,
+      "bfMethod": "navy",
+      "lbmKg": 62.88,
+      "fatMassKg": 13.62,
+      "ffmi": 22.7,
+      "vTaper": 1.41,
+      "waistToHeight": 0.503,
+      "circumferences": {
+        "neck": 39.5,
+        "shoulders": 120,
+        "chest": 102,
+        "armRight": 37.5,
+        "waist": 85,
+        "thighRight": 58,
+        "calf": 38.5
+      },
+      "notes": "Início do acompanhamento estruturado"
+    },
+    {
+      "id": "seed-2",
+      "date": "2026-10-20",
+      "weightKg": 75.8,
+      "bfPercent": 16.4,
+      "bfMethod": "navy",
+      "lbmKg": 63.37,
+      "fatMassKg": 12.43,
+      "ffmi": 22.8,
+      "vTaper": 1.445,
+      "waistToHeight": 0.494,
+      "circumferences": {
+        "neck": 39.8,
+        "shoulders": 120.7,
+        "chest": 102.5,
+        "armRight": 38,
+        "waist": 83.5,
+        "thighRight": 58.5,
+        "calf": 38.7
+      },
+      "notes": "Recomposição progredindo bem"
+    },
+    {
+      "id": "seed-3",
+      "date": "2026-11-10",
+      "weightKg": 75.2,
+      "bfPercent": 15.2,
+      "bfMethod": "pollock3",
+      "lbmKg": 63.77,
+      "fatMassKg": 11.43,
+      "ffmi": 23,
+      "vTaper": 1.482,
+      "waistToHeight": 0.485,
+      "circumferences": {
+        "neck": 40,
+        "shoulders": 121.5,
+        "chest": 103.5,
+        "armRight": 38.5,
+        "waist": 82,
+        "thighRight": 59,
+        "calf": 39
+      },
+      "skinfolds": {
+        "chest": 11,
+        "abdomen": 18,
+        "thigh": 14
+      },
+      "notes": "Medição com fita + 3 dobras cutâneas"
+    }
+  ],
+  "routines": [
+    {
+      "id": "routine-push",
+      "name": "Treino A — Push (Peito, Ombro e Tríceps)",
+      "description": "Foco em tensão mecânica nos empurrões e deltoide lateral",
+      "exercises": [
+        {
+          "id": "ex-bench",
+          "name": "Supino Reto com Barra",
+          "muscleGroup": "Peitoral",
+          "targetSets": 4,
+          "targetReps": "6-8",
+          "restSeconds": 120
+        },
+        {
+          "id": "ex-incline-db",
+          "name": "Supino Inclinado com Halteres",
+          "muscleGroup": "Peitoral Superior",
+          "targetSets": 3,
+          "targetReps": "8-10",
+          "restSeconds": 90
+        },
+        {
+          "id": "ex-ohp",
+          "name": "Desenvolvimento Militar (OHP)",
+          "muscleGroup": "Ombros",
+          "targetSets": 3,
+          "targetReps": "8-10",
+          "restSeconds": 120
+        },
+        {
+          "id": "ex-lat-raise",
+          "name": "Elevação Lateral com Halteres",
+          "muscleGroup": "Ombros",
+          "targetSets": 4,
+          "targetReps": "12-15",
+          "restSeconds": 60
+        },
+        {
+          "id": "ex-triceps-pushdown",
+          "name": "Tríceps Pulley na Corda",
+          "muscleGroup": "Tríceps",
+          "targetSets": 3,
+          "targetReps": "10-12",
+          "restSeconds": 60
+        }
+      ]
+    },
+    {
+      "id": "routine-pull",
+      "name": "Treino B — Pull (Costas, Trapézio e Bíceps)",
+      "description": "Largura de dorsal (V-Taper), espessura de costas e braços",
+      "exercises": [
+        {
+          "id": "ex-pullup",
+          "name": "Barra Fixa / Puxada Alta Frontal",
+          "muscleGroup": "Dorsal",
+          "targetSets": 4,
+          "targetReps": "8-10",
+          "restSeconds": 120
+        },
+        {
+          "id": "ex-barbell-row",
+          "name": "Remada Curvada com Barra",
+          "muscleGroup": "Costas",
+          "targetSets": 4,
+          "targetReps": "8-10",
+          "restSeconds": 120
+        },
+        {
+          "id": "ex-facepull",
+          "name": "Face Pull na Polia",
+          "muscleGroup": "Ombro Posterior",
+          "targetSets": 3,
+          "targetReps": "12-15",
+          "restSeconds": 60
+        },
+        {
+          "id": "ex-barbell-curl",
+          "name": "Rosca Direta com Barra W",
+          "muscleGroup": "Bíceps",
+          "targetSets": 3,
+          "targetReps": "8-12",
+          "restSeconds": 75
+        },
+        {
+          "id": "ex-hammer-curl",
+          "name": "Rosca Martelo com Halteres",
+          "muscleGroup": "Bíceps / Antebraço",
+          "targetSets": 3,
+          "targetReps": "10-12",
+          "restSeconds": 60
+        }
+      ]
+    },
+    {
+      "id": "routine-legs",
+      "name": "Treino C — Legs (Quadríceps, Posterior e Panturrilha)",
+      "description": "Base de força inferior e hipertrofia de coxas",
+      "exercises": [
+        {
+          "id": "ex-squat",
+          "name": "Agachamento Livre com Barra",
+          "muscleGroup": "Quadríceps / Glúteo",
+          "targetSets": 4,
+          "targetReps": "6-8",
+          "restSeconds": 150
+        },
+        {
+          "id": "ex-rdl",
+          "name": "Stiff / Terra Romeno (RDL)",
+          "muscleGroup": "Posterior de Coxa",
+          "targetSets": 4,
+          "targetReps": "8-10",
+          "restSeconds": 120
+        },
+        {
+          "id": "ex-legpress",
+          "name": "Leg Press 45°",
+          "muscleGroup": "Quadríceps",
+          "targetSets": 3,
+          "targetReps": "10-12",
+          "restSeconds": 90
+        },
+        {
+          "id": "ex-legcurl",
+          "name": "Mesa Flexora",
+          "muscleGroup": "Posterior de Coxa",
+          "targetSets": 3,
+          "targetReps": "12-15",
+          "restSeconds": 60
+        },
+        {
+          "id": "ex-calf",
+          "name": "Panturrilha em Pé na Máquina",
+          "muscleGroup": "Panturrilha",
+          "targetSets": 4,
+          "targetReps": "12-15",
+          "restSeconds": 60
+        }
+      ]
+    }
+  ],
+  "workoutSessions": [
+    {
+      "id": "session-seed-1",
+      "routineId": "routine-push",
+      "routineName": "Treino A — Push (Peito, Ombro e Tríceps)",
+      "date": "2026-11-08",
+      "startedAt": 1794150000000,
+      "finishedAt": 1794153420000,
+      "durationSeconds": 3420,
+      "totalVolumeKg": 4280,
+      "completedSetsCount": 14,
+      "exercises": [
+        {
+          "exerciseId": "ex-bench",
+          "name": "Supino Reto com Barra",
+          "muscleGroup": "Peitoral",
+          "restSeconds": 120,
+          "sets": [
+            {
+              "setNumber": 1,
+              "weightKg": 70,
+              "reps": 8,
+              "completed": true
+            },
+            {
+              "setNumber": 2,
+              "weightKg": 75,
+              "reps": 8,
+              "completed": true
+            },
+            {
+              "setNumber": 3,
+              "weightKg": 75,
+              "reps": 7,
+              "completed": true
+            },
+            {
+              "setNumber": 4,
+              "weightKg": 75,
+              "reps": 6,
+              "completed": true
+            }
+          ]
+        },
+        {
+          "exerciseId": "ex-incline-db",
+          "name": "Supino Inclinado com Halteres",
+          "muscleGroup": "Peitoral Superior",
+          "restSeconds": 90,
+          "sets": [
+            {
+              "setNumber": 1,
+              "weightKg": 26,
+              "reps": 10,
+              "completed": true
+            },
+            {
+              "setNumber": 2,
+              "weightKg": 26,
+              "reps": 9,
+              "completed": true
+            },
+            {
+              "setNumber": 3,
+              "weightKg": 26,
+              "reps": 8,
+              "completed": true
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "updatedAt": "2026-11-10T16:22:43.703Z"
+}
