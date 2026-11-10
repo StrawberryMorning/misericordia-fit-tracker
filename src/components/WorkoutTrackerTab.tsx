@@ -10,18 +10,25 @@ import {
 import { calculateEstimated1RM } from "@/lib/formulas";
 import { WorkoutSplitGuideModal } from "./WorkoutSplitGuideModal";
 import { WeeklyVolumeCalculatorModal } from "./WeeklyVolumeCalculatorModal";
-import { ExerciseExecutionModal } from "./ExerciseExecutionModal";
+import {
+  ExerciseExecutionModal,
+  getDifficultyBadgeStyle,
+} from "./ExerciseExecutionModal";
 import { ExerciseAnimationSVG } from "./ExerciseAnimationSVG";
 import {
   CatalogExercise,
   EXERCISE_CATALOG,
+  MUSCLE_BIOMECHANICS_GUIDE,
   MUSCLE_GROUPS,
   resolveExerciseIllustration,
 } from "@/lib/exerciseCatalog";
 import {
   BarChart3,
   BookOpen,
+  Brain,
   Check,
+  ChevronDown,
+  ChevronUp,
   Clock,
   Dumbbell,
   Eye,
@@ -134,6 +141,7 @@ export function WorkoutTrackerTab({
   const [newRoutineDesc, setNewRoutineDesc] = useState("");
   const [isSplitGuideOpen, setIsSplitGuideOpen] = useState(false);
   const [isVolumeCalcOpen, setIsVolumeCalcOpen] = useState(false);
+  const [showBiomechanicsBanner, setShowBiomechanicsBanner] = useState(false);
   const [previewExercise, setPreviewExercise] =
     useState<CatalogExercise | null>(null);
 
@@ -656,9 +664,25 @@ export function WorkoutTrackerTab({
                       />
                     </button>
                     <div>
-                      <span className="text-[10px] font-bold uppercase tracking-wider text-sky-400 bg-sky-500/10 px-2 py-0.5 rounded">
-                        {ex.muscleGroup}
-                      </span>
+                      <div className="flex flex-wrap items-center gap-1.5">
+                        <span className="text-[10px] font-bold uppercase tracking-wider text-sky-400 bg-sky-500/10 px-2 py-0.5 rounded">
+                          {ex.muscleGroup}
+                        </span>
+                        {illustration.primaryTarget && (
+                          <span className="text-[10px] font-medium text-slate-300 bg-slate-800/80 px-2 py-0.5 rounded">
+                            Alvo: {illustration.primaryTarget}
+                          </span>
+                        )}
+                        {illustration.difficulty && (
+                          <span
+                            className={`text-[10px] font-bold px-2 py-0.5 rounded border ${getDifficultyBadgeStyle(
+                              illustration.difficulty
+                            )}`}
+                          >
+                            Dif. {illustration.difficulty}
+                          </span>
+                        )}
+                      </div>
                       <div className="flex items-center gap-2 mt-1">
                         <h3 className="text-base font-bold text-white">
                           {ex.name}
@@ -669,7 +693,7 @@ export function WorkoutTrackerTab({
                           className="inline-flex items-center gap-1 text-[11px] font-bold text-sky-400 hover:text-sky-300 bg-sky-500/10 border border-sky-500/30 px-2 py-0.5 rounded-lg cursor-pointer"
                         >
                           <Eye className="w-3 h-3" />
-                          <span>Ver Execução</span>
+                          <span>Ficha Biomecânica</span>
                         </button>
                       </div>
                     </div>
@@ -930,9 +954,25 @@ export function WorkoutTrackerTab({
                                 <span className="font-semibold block truncate text-white">
                                   {ex.name}
                                 </span>
-                                <span className="text-[10px] text-slate-400 block">
-                                  {ex.muscleGroup} • Descanso {ex.restSeconds}s
-                                </span>
+                                <div className="flex flex-wrap items-center gap-1 mt-0.5">
+                                  <span className="text-[10px] text-slate-400">
+                                    {ex.muscleGroup} • {ex.restSeconds}s
+                                  </span>
+                                  {ill.difficulty && (
+                                    <span
+                                      className={`text-[9px] font-bold px-1.5 py-0.2 rounded border ${getDifficultyBadgeStyle(
+                                        ill.difficulty
+                                      )}`}
+                                    >
+                                      {ill.difficulty}
+                                    </span>
+                                  )}
+                                  {ill.resistanceCurve && (
+                                    <span className="text-[9px] font-semibold bg-purple-500/15 text-purple-300 border border-purple-500/25 px-1.5 py-0.2 rounded truncate max-w-[130px]">
+                                      {ill.resistanceCurve}
+                                    </span>
+                                  )}
+                                </div>
                               </div>
                             </div>
                             <div className="flex items-center gap-1.5 shrink-0">
@@ -1073,31 +1113,110 @@ export function WorkoutTrackerTab({
 
                           {/* Filtro por Grupo Muscular */}
                           {!catalogSearch.trim() && (
-                            <div className="flex flex-wrap gap-1">
-                              {MUSCLE_GROUPS.map((m) => {
-                                const count = EXERCISE_CATALOG.filter(
-                                  (e) => e.muscleGroup === m
-                                ).length;
-                                return (
+                            <div className="space-y-2">
+                              <div className="flex flex-wrap gap-1">
+                                {MUSCLE_GROUPS.map((m) => {
+                                  const count = EXERCISE_CATALOG.filter(
+                                    (e) => e.muscleGroup === m
+                                  ).length;
+                                  return (
+                                    <button
+                                      key={m}
+                                      type="button"
+                                      onClick={() => setSelectedMuscleFilter(m)}
+                                      className={`px-2 py-1 rounded-md text-[10px] font-bold transition-all cursor-pointer ${
+                                        selectedMuscleFilter === m
+                                          ? "bg-sky-500/20 border border-sky-500 text-sky-300"
+                                          : "bg-slate-900 border border-slate-800 text-slate-400 hover:text-slate-200"
+                                      }`}
+                                    >
+                                      {m} ({count})
+                                    </button>
+                                  );
+                                })}
+                              </div>
+
+                              {/* Nível 3: Resumo Biomecânico & Visualização Anatômica do Grupo Muscular */}
+                              {MUSCLE_BIOMECHANICS_GUIDE[
+                                selectedMuscleFilter
+                              ] && (
+                                <div className="bg-slate-900/95 border border-sky-500/25 rounded-lg p-2.5 space-y-2">
                                   <button
-                                    key={m}
                                     type="button"
-                                    onClick={() => setSelectedMuscleFilter(m)}
-                                    className={`px-2 py-1 rounded-md text-[10px] font-bold transition-all cursor-pointer ${
-                                      selectedMuscleFilter === m
-                                        ? "bg-sky-500/20 border border-sky-500 text-sky-300"
-                                        : "bg-slate-900 border border-slate-800 text-slate-400 hover:text-slate-200"
-                                    }`}
+                                    onClick={() =>
+                                      setShowBiomechanicsBanner(
+                                        !showBiomechanicsBanner
+                                      )
+                                    }
+                                    className="w-full flex items-center justify-between text-left text-[11px] font-bold text-sky-300 cursor-pointer"
                                   >
-                                    {m} ({count})
+                                    <span className="flex items-center gap-1.5">
+                                      <Brain className="w-3.5 h-3.5 text-sky-400 shrink-0" />
+                                      <span>
+                                        Entender Biomecânica:{" "}
+                                        {
+                                          MUSCLE_BIOMECHANICS_GUIDE[
+                                            selectedMuscleFilter
+                                          ].title
+                                        }
+                                      </span>
+                                    </span>
+                                    {showBiomechanicsBanner ? (
+                                      <ChevronUp className="w-3.5 h-3.5 text-slate-400 shrink-0" />
+                                    ) : (
+                                      <ChevronDown className="w-3.5 h-3.5 text-slate-400 shrink-0" />
+                                    )}
                                   </button>
-                                );
-                              })}
+
+                                  {showBiomechanicsBanner && (
+                                    <div className="pt-2 border-t border-slate-800 space-y-2 text-[11px] text-slate-300">
+                                      <div>
+                                        <span className="font-bold text-sky-400 block">
+                                          Visualização Anatômica:
+                                        </span>
+                                        <p className="text-slate-300 leading-relaxed">
+                                          {
+                                            MUSCLE_BIOMECHANICS_GUIDE[
+                                              selectedMuscleFilter
+                                            ].anatomicalVisualization
+                                          }
+                                        </p>
+                                      </div>
+
+                                      <div>
+                                        <span className="font-bold text-emerald-400 block">
+                                          Regra de Ouro (Seleção de Exercícios):
+                                        </span>
+                                        <p className="text-slate-300 leading-relaxed">
+                                          {
+                                            MUSCLE_BIOMECHANICS_GUIDE[
+                                              selectedMuscleFilter
+                                            ].goldenRule
+                                          }
+                                        </p>
+                                      </div>
+
+                                      <div className="flex flex-wrap gap-1 pt-0.5">
+                                        {MUSCLE_BIOMECHANICS_GUIDE[
+                                          selectedMuscleFilter
+                                        ].subdivisions.map((sub) => (
+                                          <span
+                                            key={sub}
+                                            className="text-[9px] font-semibold bg-slate-950 border border-slate-800 text-slate-300 px-1.5 py-0.5 rounded"
+                                          >
+                                            {sub}
+                                          </span>
+                                        ))}
+                                      </div>
+                                    </div>
+                                  )}
+                                </div>
+                              )}
                             </div>
                           )}
 
                           {/* Lista de Exercícios Pré-Selecionados daquele Músculo */}
-                          <div className="max-h-64 overflow-y-auto space-y-1.5 pr-1">
+                          <div className="max-h-72 overflow-y-auto space-y-1.5 pr-1">
                             {EXERCISE_CATALOG.filter((item) =>
                               catalogSearch.trim()
                                 ? item.name
@@ -1105,7 +1224,11 @@ export function WorkoutTrackerTab({
                                     .includes(catalogSearch.toLowerCase()) ||
                                   item.muscleGroup
                                     .toLowerCase()
-                                    .includes(catalogSearch.toLowerCase())
+                                    .includes(catalogSearch.toLowerCase()) ||
+                                  (item.primaryTarget &&
+                                    item.primaryTarget
+                                      .toLowerCase()
+                                      .includes(catalogSearch.toLowerCase()))
                                 : item.muscleGroup === selectedMuscleFilter
                             ).map((cat) => (
                               <div
@@ -1116,7 +1239,7 @@ export function WorkoutTrackerTab({
                                   <button
                                     type="button"
                                     onClick={() => setPreviewExercise(cat)}
-                                    title="Ver bonequinho executando"
+                                    title="Ver ficha biomecânica e animação"
                                     className="shrink-0 cursor-pointer"
                                   >
                                     <ExerciseAnimationSVG
@@ -1124,14 +1247,35 @@ export function WorkoutTrackerTab({
                                       size="sm"
                                     />
                                   </button>
-                                  <div className="min-w-0">
+                                  <div className="min-w-0 space-y-0.5">
                                     <div className="text-xs font-bold text-white truncate">
                                       {cat.name}
                                     </div>
-                                    <div className="text-[10px] text-slate-400">
-                                      {cat.defaultSets}x{cat.defaultReps} •{" "}
-                                      {cat.defaultRest}s
+                                    <div className="flex flex-wrap items-center gap-1">
+                                      <span className="text-[10px] text-slate-400">
+                                        {cat.defaultSets}x{cat.defaultReps} •{" "}
+                                        {cat.defaultRest}s
+                                      </span>
+                                      {cat.difficulty && (
+                                        <span
+                                          className={`text-[9px] font-bold px-1.5 py-0.2 rounded border ${getDifficultyBadgeStyle(
+                                            cat.difficulty
+                                          )}`}
+                                        >
+                                          {cat.difficulty}
+                                        </span>
+                                      )}
+                                      {cat.resistanceCurve && (
+                                        <span className="text-[9px] font-semibold bg-purple-500/15 text-purple-300 border border-purple-500/25 px-1.5 py-0.2 rounded">
+                                          {cat.resistanceCurve}
+                                        </span>
+                                      )}
                                     </div>
+                                    {cat.primaryTarget && (
+                                      <div className="text-[10px] text-sky-300/90 truncate">
+                                        Foco: {cat.primaryTarget}
+                                      </div>
+                                    )}
                                   </div>
                                 </div>
 
@@ -1139,7 +1283,7 @@ export function WorkoutTrackerTab({
                                   <button
                                     type="button"
                                     onClick={() => setPreviewExercise(cat)}
-                                    title="Ver bonequinho e dicas"
+                                    title="Abrir Ficha Biomecânica Completa"
                                     className="p-1.5 rounded-lg bg-slate-950 hover:bg-slate-800 text-sky-400 border border-slate-800 cursor-pointer"
                                   >
                                     <Eye className="w-3.5 h-3.5" />
