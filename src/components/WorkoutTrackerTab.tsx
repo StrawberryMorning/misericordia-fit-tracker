@@ -372,6 +372,13 @@ export function WorkoutTrackerTab({
     setEditingRoutineId(created.id);
   };
 
+  const handleDeleteRoutine = (routineId: string, routineName: string) => {
+    if (confirm(`Deseja apagar a ficha "${routineName}"?`)) {
+      onUpdateRoutines(routines.filter((r) => r.id !== routineId));
+      if (editingRoutineId === routineId) setEditingRoutineId(null);
+    }
+  };
+
   // ============================================================================
   // VIEW 1: MODO TREINO AO VIVO (Quando há um treino em andamento)
   // ============================================================================
@@ -686,7 +693,29 @@ export function WorkoutTrackerTab({
               e descanso automático
             </p>
           </div>
+          {routines.length > 0 && (
+            <button
+              type="button"
+              onClick={() => {
+                if (confirm("Deseja apagar todas as fichas de treino atuais?")) {
+                  onUpdateRoutines([]);
+                  setEditingRoutineId(null);
+                }
+              }}
+              className="text-xs flex items-center gap-1.5 bg-rose-950/40 hover:bg-rose-900/50 border border-rose-800/40 text-rose-300 px-3 py-1.5 rounded-lg font-semibold transition-colors cursor-pointer"
+            >
+              <Trash2 className="w-3.5 h-3.5" />
+              <span>Apagar Todas as Fichas</span>
+            </button>
+          )}
         </div>
+
+        {routines.length === 0 && (
+          <div className="bg-slate-900/60 border border-slate-800 rounded-2xl p-8 text-center text-sm text-slate-400">
+            Nenhuma ficha cadastrada. Crie sua própria ficha personalizada no
+            formulário abaixo!
+          </div>
+        )}
 
         <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
           {routines.map((routine) => {
@@ -701,9 +730,21 @@ export function WorkoutTrackerTab({
                     <h3 className="text-base font-extrabold text-white">
                       {routine.name}
                     </h3>
-                    <span className="text-[11px] font-bold bg-sky-500/10 text-sky-400 border border-sky-500/20 px-2 py-0.5 rounded-full shrink-0">
-                      {routine.exercises.length} exerc.
-                    </span>
+                    <div className="flex items-center gap-1.5 shrink-0">
+                      <span className="text-[11px] font-bold bg-sky-500/10 text-sky-400 border border-sky-500/20 px-2 py-0.5 rounded-full">
+                        {routine.exercises.length} exerc.
+                      </span>
+                      <button
+                        type="button"
+                        onClick={() =>
+                          handleDeleteRoutine(routine.id, routine.name)
+                        }
+                        title="Apagar esta ficha de treino"
+                        className="p-1.5 rounded-lg text-slate-500 hover:text-rose-400 hover:bg-rose-950/40 transition-colors cursor-pointer"
+                      >
+                        <Trash2 className="w-4 h-4" />
+                      </button>
+                    </div>
                   </div>
                   <p className="text-xs text-slate-400">{routine.description}</p>
 
