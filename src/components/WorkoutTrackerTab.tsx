@@ -9,6 +9,7 @@ import {
 } from "@/lib/types";
 import { calculateEstimated1RM } from "@/lib/formulas";
 import { WorkoutSplitGuideModal } from "./WorkoutSplitGuideModal";
+import { WeeklyVolumeCalculatorModal } from "./WeeklyVolumeCalculatorModal";
 import { ExerciseExecutionModal } from "./ExerciseExecutionModal";
 import { ExerciseAnimationSVG } from "./ExerciseAnimationSVG";
 import {
@@ -18,6 +19,7 @@ import {
   resolveExerciseIllustration,
 } from "@/lib/exerciseCatalog";
 import {
+  BarChart3,
   BookOpen,
   Check,
   Clock,
@@ -131,6 +133,7 @@ export function WorkoutTrackerTab({
   const [newRoutineName, setNewRoutineName] = useState("");
   const [newRoutineDesc, setNewRoutineDesc] = useState("");
   const [isSplitGuideOpen, setIsSplitGuideOpen] = useState(false);
+  const [isVolumeCalcOpen, setIsVolumeCalcOpen] = useState(false);
   const [previewExercise, setPreviewExercise] =
     useState<CatalogExercise | null>(null);
 
@@ -793,6 +796,13 @@ export function WorkoutTrackerTab({
         }}
       />
 
+      <WeeklyVolumeCalculatorModal
+        isOpen={isVolumeCalcOpen}
+        onClose={() => setIsVolumeCalcOpen(false)}
+        routines={routines}
+        onUpdateRoutines={onUpdateRoutines}
+      />
+
       {/* Fichas de Treino Disponíveis */}
       <div className="space-y-4">
         <div className="flex flex-wrap items-center justify-between gap-2">
@@ -806,6 +816,15 @@ export function WorkoutTrackerTab({
             </p>
           </div>
           <div className="flex flex-wrap items-center gap-2">
+            <button
+              type="button"
+              onClick={() => setIsVolumeCalcOpen(true)}
+              className="text-xs flex items-center gap-1.5 bg-emerald-500/15 hover:bg-emerald-500/25 border border-emerald-500/40 text-emerald-300 px-3.5 py-2 rounded-xl font-bold transition-colors cursor-pointer shadow-sm"
+            >
+              <BarChart3 className="w-4 h-4 text-emerald-400" />
+              <span>Calculadora de Volume Semanal</span>
+            </button>
+
             <button
               type="button"
               onClick={() => setIsSplitGuideOpen(true)}
