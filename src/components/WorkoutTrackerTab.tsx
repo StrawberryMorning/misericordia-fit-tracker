@@ -393,6 +393,31 @@ export function WorkoutTrackerTab({
     onUpdateRoutines(updated);
   };
 
+  const handleUpdateRoutineExerciseField = (
+    routineId: string,
+    exId: string,
+    field: "targetSets" | "targetReps" | "restSeconds",
+    value: string
+  ) => {
+    const updated = routines.map((r) => {
+      if (r.id !== routineId) return r;
+      return {
+        ...r,
+        exercises: r.exercises.map((e) => {
+          if (e.id !== exId) return e;
+          if (field === "targetSets") {
+            return { ...e, targetSets: Math.max(1, parseInt(value) || 1) };
+          }
+          if (field === "restSeconds") {
+            return { ...e, restSeconds: Math.max(10, parseInt(value) || 60) };
+          }
+          return { ...e, targetReps: value };
+        }),
+      };
+    });
+    onUpdateRoutines(updated);
+  };
+
   const handleCreateRoutine = (e: React.FormEvent) => {
     e.preventDefault();
     if (!newRoutineName.trim()) return;
@@ -867,56 +892,123 @@ export function WorkoutTrackerTab({
                       return (
                         <li
                           key={ex.id}
-                          className="flex items-center justify-between text-slate-300 bg-slate-950/60 px-2.5 py-1.5 rounded-lg gap-2"
+                          className="text-slate-300 bg-slate-950/60 p-2 rounded-lg space-y-2 border border-slate-800/50"
                         >
-                          <div className="flex items-center gap-2 min-w-0">
-                            <button
-                              type="button"
-                              onClick={() => setPreviewExercise(ill)}
-                              title="Ver bonequinho de execução"
-                              className="shrink-0 cursor-pointer hover:scale-105 transition-transform"
-                            >
-                              <ExerciseAnimationSVG
-                                pattern={ill.pattern}
-                                size="sm"
-                              />
-                            </button>
-                            <div className="truncate">
-                              <span className="font-semibold block truncate">
-                                {ex.name}
-                              </span>
-                              <span className="text-[10px] text-slate-500 block">
-                                {ex.muscleGroup} • Descanso {ex.restSeconds}s
-                              </span>
-                            </div>
-                          </div>
-                          <div className="flex items-center gap-1.5 shrink-0">
-                            <button
-                              type="button"
-                              onClick={() => setPreviewExercise(ill)}
-                              title="Ver execução e dicas"
-                              className="p-1.5 rounded-lg bg-slate-900 hover:bg-slate-800 text-sky-400 border border-slate-800 cursor-pointer"
-                            >
-                              <Eye className="w-3.5 h-3.5" />
-                            </button>
-                            <span className="font-mono text-sky-400 font-bold">
-                              {ex.targetSets}x{ex.targetReps}
-                            </span>
-                            {isEditing && (
+                          <div className="flex items-center justify-between gap-2">
+                            <div className="flex items-center gap-2 min-w-0">
                               <button
                                 type="button"
-                                onClick={() =>
-                                  handleRemoveExerciseFromRoutine(
-                                    routine.id,
-                                    ex.id
-                                  )
-                                }
-                                className="text-rose-400 hover:text-rose-300 p-1 cursor-pointer"
+                                onClick={() => setPreviewExercise(ill)}
+                                title="Ver bonequinho de execução"
+                                className="shrink-0 cursor-pointer hover:scale-105 transition-transform"
                               >
-                                <Trash2 className="w-3.5 h-3.5" />
+                                <ExerciseAnimationSVG
+                                  pattern={ill.pattern}
+                                  size="sm"
+                                />
                               </button>
-                            )}
+                              <div className="truncate">
+                                <span className="font-semibold block truncate text-white">
+                                  {ex.name}
+                                </span>
+                                <span className="text-[10px] text-slate-400 block">
+                                  {ex.muscleGroup} • Descanso {ex.restSeconds}s
+                                </span>
+                              </div>
+                            </div>
+                            <div className="flex items-center gap-1.5 shrink-0">
+                              <button
+                                type="button"
+                                onClick={() => setPreviewExercise(ill)}
+                                title="Ver execução e dicas"
+                                className="p-1.5 rounded-lg bg-slate-900 hover:bg-slate-800 text-sky-400 border border-slate-800 cursor-pointer"
+                              >
+                                <Eye className="w-3.5 h-3.5" />
+                              </button>
+                              {!isEditing && (
+                                <span className="font-mono text-sky-400 font-bold">
+                                  {ex.targetSets}x{ex.targetReps}
+                                </span>
+                              )}
+                              {isEditing && (
+                                <button
+                                  type="button"
+                                  onClick={() =>
+                                    handleRemoveExerciseFromRoutine(
+                                      routine.id,
+                                      ex.id
+                                    )
+                                  }
+                                  title="Remover exercício da ficha"
+                                  className="text-rose-400 hover:text-rose-300 p-1 cursor-pointer"
+                                >
+                                  <Trash2 className="w-3.5 h-3.5" />
+                                </button>
+                              )}
+                            </div>
                           </div>
+
+                          {/* Edição direta de Séries, Reps e Descanso na Ficha */}
+                          {isEditing && (
+                            <div className="grid grid-cols-3 gap-1.5 pt-1.5 border-t border-slate-800/70">
+                              <div>
+                                <label className="block text-[10px] text-slate-400 mb-0.5">
+                                  Nº Séries
+                                </label>
+                                <input
+                                  type="number"
+                                  min="1"
+                                  value={ex.targetSets}
+                                  onChange={(e) =>
+                                    handleUpdateRoutineExerciseField(
+                                      routine.id,
+                                      ex.id,
+                                      "targetSets",
+                                      e.target.value
+                                    )
+                                  }
+                                  className="w-full bg-slate-900 border border-slate-700 rounded px-2 py-1 text-xs font-bold text-white text-center"
+                                />
+                              </div>
+                              <div>
+                                <label className="block text-[10px] text-slate-400 mb-0.5">
+                                  Meta Reps
+                                </label>
+                                <input
+                                  type="text"
+                                  value={ex.targetReps}
+                                  onChange={(e) =>
+                                    handleUpdateRoutineExerciseField(
+                                      routine.id,
+                                      ex.id,
+                                      "targetReps",
+                                      e.target.value
+                                    )
+                                  }
+                                  className="w-full bg-slate-900 border border-slate-700 rounded px-2 py-1 text-xs font-bold text-sky-400 text-center"
+                                />
+                              </div>
+                              <div>
+                                <label className="block text-[10px] text-slate-400 mb-0.5">
+                                  Descanso (s)
+                                </label>
+                                <input
+                                  type="number"
+                                  step="15"
+                                  value={ex.restSeconds}
+                                  onChange={(e) =>
+                                    handleUpdateRoutineExerciseField(
+                                      routine.id,
+                                      ex.id,
+                                      "restSeconds",
+                                      e.target.value
+                                    )
+                                  }
+                                  className="w-full bg-slate-900 border border-slate-700 rounded px-2 py-1 text-xs font-bold text-emerald-400 text-center"
+                                />
+                              </div>
+                            </div>
+                          )}
                         </li>
                       );
                     })}
@@ -1051,59 +1143,107 @@ export function WorkoutTrackerTab({
                           </div>
                         </div>
                       ) : (
-                        <div className="space-y-2.5">
+                        <div className="space-y-3">
                           <div className="text-xs font-bold text-sky-400">
                             Criar Exercício Personalizado
                           </div>
-                          <input
-                            type="text"
-                            placeholder="Nome (ex: Supino Articulado Máquina)"
-                            value={newExName}
-                            onChange={(e) => setNewExName(e.target.value)}
-                            className="w-full bg-slate-900 border border-slate-700 rounded-lg px-2.5 py-1.5 text-xs text-white"
-                          />
-                          <div className="grid grid-cols-2 gap-2">
-                            <select
-                              value={newExMuscle}
-                              onChange={(e) => setNewExMuscle(e.target.value)}
-                              className="bg-slate-900 border border-slate-700 rounded-lg px-2.5 py-1.5 text-xs text-white"
-                            >
-                              {MUSCLE_GROUPS.map((m) => (
-                                <option key={m} value={m}>
-                                  {m}
-                                </option>
-                              ))}
-                            </select>
-                            <input
-                              type="number"
-                              placeholder="Descanso (seg)"
-                              value={newExRest}
-                              onChange={(e) => setNewExRest(e.target.value)}
-                              className="bg-slate-900 border border-slate-700 rounded-lg px-2.5 py-1.5 text-xs text-white"
-                            />
-                          </div>
-                          <div className="grid grid-cols-2 gap-2">
-                            <input
-                              type="number"
-                              placeholder="Séries (ex: 4)"
-                              value={newExSets}
-                              onChange={(e) => setNewExSets(e.target.value)}
-                              className="bg-slate-900 border border-slate-700 rounded-lg px-2.5 py-1.5 text-xs text-white"
-                            />
+
+                          <div>
+                            <label className="block text-[11px] font-semibold text-slate-300 mb-1">
+                              Nome do Exercício
+                            </label>
                             <input
                               type="text"
-                              placeholder="Reps (ex: 8-12)"
-                              value={newExReps}
-                              onChange={(e) => setNewExReps(e.target.value)}
-                              className="bg-slate-900 border border-slate-700 rounded-lg px-2.5 py-1.5 text-xs text-white"
+                              placeholder="Ex: Supino Articulado Máquina"
+                              value={newExName}
+                              onChange={(e) => setNewExName(e.target.value)}
+                              className="w-full bg-slate-900 border border-slate-700 rounded-lg px-2.5 py-2 text-xs text-white focus:border-sky-500 outline-none"
                             />
                           </div>
+
+                          <div className="grid grid-cols-2 gap-2.5">
+                            <div>
+                              <label className="block text-[11px] font-semibold text-slate-300 mb-1">
+                                Grupo Muscular
+                              </label>
+                              <select
+                                value={newExMuscle}
+                                onChange={(e) => setNewExMuscle(e.target.value)}
+                                className="w-full bg-slate-900 border border-slate-700 rounded-lg px-2.5 py-2 text-xs text-white focus:border-sky-500 outline-none"
+                              >
+                                {MUSCLE_GROUPS.map((m) => (
+                                  <option key={m} value={m}>
+                                    {m}
+                                  </option>
+                                ))}
+                              </select>
+                            </div>
+
+                            <div>
+                              <label className="block text-[11px] font-semibold text-slate-300 mb-1">
+                                Tempo de Descanso
+                              </label>
+                              <div className="relative">
+                                <input
+                                  type="number"
+                                  step="15"
+                                  placeholder="90"
+                                  value={newExRest}
+                                  onChange={(e) => setNewExRest(e.target.value)}
+                                  className="w-full bg-slate-900 border border-slate-700 rounded-lg pl-2.5 pr-9 py-2 text-xs font-bold text-emerald-400 focus:border-sky-500 outline-none"
+                                />
+                                <span className="absolute right-2.5 top-1/2 -translate-y-1/2 text-[10px] font-semibold text-slate-500 pointer-events-none">
+                                  seg
+                                </span>
+                              </div>
+                            </div>
+                          </div>
+
+                          <div className="grid grid-cols-2 gap-2.5">
+                            <div>
+                              <label className="block text-[11px] font-semibold text-slate-300 mb-1">
+                                Nº de Séries
+                              </label>
+                              <div className="relative">
+                                <input
+                                  type="number"
+                                  min="1"
+                                  placeholder="3"
+                                  value={newExSets}
+                                  onChange={(e) => setNewExSets(e.target.value)}
+                                  className="w-full bg-slate-900 border border-slate-700 rounded-lg pl-2.5 pr-12 py-2 text-xs font-bold text-white focus:border-sky-500 outline-none"
+                                />
+                                <span className="absolute right-2.5 top-1/2 -translate-y-1/2 text-[10px] font-semibold text-slate-500 pointer-events-none">
+                                  séries
+                                </span>
+                              </div>
+                            </div>
+
+                            <div>
+                              <label className="block text-[11px] font-semibold text-slate-300 mb-1">
+                                Meta de Repetições
+                              </label>
+                              <div className="relative">
+                                <input
+                                  type="text"
+                                  placeholder="8-12"
+                                  value={newExReps}
+                                  onChange={(e) => setNewExReps(e.target.value)}
+                                  className="w-full bg-slate-900 border border-slate-700 rounded-lg pl-2.5 pr-10 py-2 text-xs font-bold text-sky-400 focus:border-sky-500 outline-none"
+                                />
+                                <span className="absolute right-2.5 top-1/2 -translate-y-1/2 text-[10px] font-semibold text-slate-500 pointer-events-none">
+                                  reps
+                                </span>
+                              </div>
+                            </div>
+                          </div>
+
                           <button
                             type="button"
                             onClick={() =>
                               handleAddExerciseToRoutine(routine.id)
                             }
-                            className="w-full bg-sky-500/20 border border-sky-500/40 text-sky-300 font-bold py-1.5 rounded-lg text-xs hover:bg-sky-500/30 cursor-pointer"
+                            className="w-full bg-sky-500/20 border border-sky-500/40 text-sky-300 font-bold py-2 rounded-lg text-xs hover:bg-sky-500/30 cursor-pointer"
                           >
                             + Adicionar Exercício Personalizado
                           </button>
