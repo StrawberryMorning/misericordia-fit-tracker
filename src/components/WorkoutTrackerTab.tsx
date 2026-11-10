@@ -120,6 +120,7 @@ export function WorkoutTrackerTab({
   const [addMode, setAddMode] = useState<"catalog" | "custom">("catalog");
   const [selectedMuscleFilter, setSelectedMuscleFilter] =
     useState<string>("Peitoral");
+  const [catalogSearch, setCatalogSearch] = useState<string>("");
   const [newExName, setNewExName] = useState("");
   const [newExMuscle, setNewExMuscle] = useState("Peitoral");
   const [newExSets, setNewExSets] = useState("3");
@@ -951,29 +952,50 @@ export function WorkoutTrackerTab({
 
                       {addMode === "catalog" ? (
                         <div className="space-y-2.5">
+                          <input
+                            type="text"
+                            placeholder="Buscar exercício em todos os músculos (ex: Supino, Rosca, Polia)..."
+                            value={catalogSearch}
+                            onChange={(e) => setCatalogSearch(e.target.value)}
+                            className="w-full bg-slate-900 border border-slate-700 rounded-lg px-2.5 py-1.5 text-xs text-white focus:border-sky-500 outline-none"
+                          />
+
                           {/* Filtro por Grupo Muscular */}
-                          <div className="flex flex-wrap gap-1">
-                            {MUSCLE_GROUPS.map((m) => (
-                              <button
-                                key={m}
-                                type="button"
-                                onClick={() => setSelectedMuscleFilter(m)}
-                                className={`px-2 py-1 rounded-md text-[10px] font-bold transition-all cursor-pointer ${
-                                  selectedMuscleFilter === m
-                                    ? "bg-sky-500/20 border border-sky-500 text-sky-300"
-                                    : "bg-slate-900 border border-slate-800 text-slate-400 hover:text-slate-200"
-                                }`}
-                              >
-                                {m}
-                              </button>
-                            ))}
-                          </div>
+                          {!catalogSearch.trim() && (
+                            <div className="flex flex-wrap gap-1">
+                              {MUSCLE_GROUPS.map((m) => {
+                                const count = EXERCISE_CATALOG.filter(
+                                  (e) => e.muscleGroup === m
+                                ).length;
+                                return (
+                                  <button
+                                    key={m}
+                                    type="button"
+                                    onClick={() => setSelectedMuscleFilter(m)}
+                                    className={`px-2 py-1 rounded-md text-[10px] font-bold transition-all cursor-pointer ${
+                                      selectedMuscleFilter === m
+                                        ? "bg-sky-500/20 border border-sky-500 text-sky-300"
+                                        : "bg-slate-900 border border-slate-800 text-slate-400 hover:text-slate-200"
+                                    }`}
+                                  >
+                                    {m} ({count})
+                                  </button>
+                                );
+                              })}
+                            </div>
+                          )}
 
                           {/* Lista de Exercícios Pré-Selecionados daquele Músculo */}
-                          <div className="max-h-56 overflow-y-auto space-y-1.5 pr-1">
-                            {EXERCISE_CATALOG.filter(
-                              (item) =>
-                                item.muscleGroup === selectedMuscleFilter
+                          <div className="max-h-64 overflow-y-auto space-y-1.5 pr-1">
+                            {EXERCISE_CATALOG.filter((item) =>
+                              catalogSearch.trim()
+                                ? item.name
+                                    .toLowerCase()
+                                    .includes(catalogSearch.toLowerCase()) ||
+                                  item.muscleGroup
+                                    .toLowerCase()
+                                    .includes(catalogSearch.toLowerCase())
+                                : item.muscleGroup === selectedMuscleFilter
                             ).map((cat) => (
                               <div
                                 key={cat.id}
