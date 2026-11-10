@@ -8,7 +8,9 @@ import {
   WorkoutSession,
 } from "@/lib/types";
 import { calculateEstimated1RM } from "@/lib/formulas";
+import { WorkoutSplitGuideModal } from "./WorkoutSplitGuideModal";
 import {
+  BookOpen,
   Check,
   Clock,
   Dumbbell,
@@ -16,7 +18,6 @@ import {
   Pause,
   Play,
   Plus,
-  RotateCcw,
   SkipForward,
   Square,
   Timer,
@@ -116,6 +117,7 @@ export function WorkoutTrackerTab({
   // New Routine Modal/State
   const [newRoutineName, setNewRoutineName] = useState("");
   const [newRoutineDesc, setNewRoutineDesc] = useState("");
+  const [isSplitGuideOpen, setIsSplitGuideOpen] = useState(false);
 
   // 1. Live Session Stopwatch Effect
   useEffect(() => {
@@ -681,6 +683,20 @@ export function WorkoutTrackerTab({
   // ============================================================================
   return (
     <div className="space-y-8">
+      <WorkoutSplitGuideModal
+        isOpen={isSplitGuideOpen}
+        onClose={() => setIsSplitGuideOpen(false)}
+        hasExistingRoutines={routines.length > 0}
+        onApplyRoutines={(generated, replaceExisting) => {
+          if (replaceExisting) {
+            onUpdateRoutines(generated);
+          } else {
+            onUpdateRoutines([...routines, ...generated]);
+          }
+          setEditingRoutineId(null);
+        }}
+      />
+
       {/* Fichas de Treino Disponíveis */}
       <div className="space-y-4">
         <div className="flex flex-wrap items-center justify-between gap-2">
@@ -693,27 +709,49 @@ export function WorkoutTrackerTab({
               e descanso automático
             </p>
           </div>
-          {routines.length > 0 && (
+          <div className="flex flex-wrap items-center gap-2">
             <button
               type="button"
-              onClick={() => {
-                if (confirm("Deseja apagar todas as fichas de treino atuais?")) {
-                  onUpdateRoutines([]);
-                  setEditingRoutineId(null);
-                }
-              }}
-              className="text-xs flex items-center gap-1.5 bg-rose-950/40 hover:bg-rose-900/50 border border-rose-800/40 text-rose-300 px-3 py-1.5 rounded-lg font-semibold transition-colors cursor-pointer"
+              onClick={() => setIsSplitGuideOpen(true)}
+              className="text-xs flex items-center gap-1.5 bg-sky-500/15 hover:bg-sky-500/25 border border-sky-500/40 text-sky-300 px-3.5 py-2 rounded-xl font-bold transition-colors cursor-pointer shadow-sm"
             >
-              <Trash2 className="w-3.5 h-3.5" />
-              <span>Apagar Todas as Fichas</span>
+              <BookOpen className="w-4 h-4 text-sky-400" />
+              <span>Guia de Divisões & Gerador de Treinos</span>
             </button>
-          )}
+
+            {routines.length > 0 && (
+              <button
+                type="button"
+                onClick={() => {
+                  if (
+                    confirm("Deseja apagar todas as fichas de treino atuais?")
+                  ) {
+                    onUpdateRoutines([]);
+                    setEditingRoutineId(null);
+                  }
+                }}
+                className="text-xs flex items-center gap-1.5 bg-rose-950/40 hover:bg-rose-900/50 border border-rose-800/40 text-rose-300 px-3 py-2 rounded-xl font-semibold transition-colors cursor-pointer"
+              >
+                <Trash2 className="w-3.5 h-3.5" />
+                <span>Apagar Todas as Fichas</span>
+              </button>
+            )}
+          </div>
         </div>
 
         {routines.length === 0 && (
-          <div className="bg-slate-900/60 border border-slate-800 rounded-2xl p-8 text-center text-sm text-slate-400">
-            Nenhuma ficha cadastrada. Crie sua própria ficha personalizada no
-            formulário abaixo!
+          <div className="bg-slate-900/60 border border-slate-800 rounded-2xl p-8 text-center space-y-3">
+            <p className="text-sm text-slate-400">
+              Nenhuma ficha cadastrada no momento.
+            </p>
+            <button
+              type="button"
+              onClick={() => setIsSplitGuideOpen(true)}
+              className="inline-flex items-center gap-2 bg-sky-500 hover:bg-sky-400 text-slate-950 font-extrabold px-4 py-2.5 rounded-xl text-xs transition-all cursor-pointer"
+            >
+              <BookOpen className="w-4 h-4" />
+              <span>Abrir Guia de Divisões (Upper/Lower, Full Body, ABC, ABCD...)</span>
+            </button>
           </div>
         )}
 
