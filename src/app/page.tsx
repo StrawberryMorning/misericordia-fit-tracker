@@ -194,7 +194,7 @@ export default function HomePage() {
     const url = URL.createObjectURL(blob);
     const a = document.createElement("a");
     a.href = url;
-    a.download = `brass-bell-backup-${
+    a.download = `goliath-backup-${
       new Date().toISOString().split("T")[0]
     }.json`;
     a.click();
@@ -237,16 +237,20 @@ export default function HomePage() {
             </div>
 
             <div className="flex items-center justify-between gap-2.5">
-              <div className="flex items-center gap-2.5">
-                <div className="w-9 h-9 rounded-xl bg-sky-500 flex items-center justify-center text-slate-950 font-black text-lg shadow-lg shadow-sky-500/30">
-                  BB
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 rounded-xl overflow-hidden border border-amber-500/30 shadow-lg shadow-amber-950/40 bg-slate-950 shrink-0">
+                  <img
+                    src="/goliath-logo.jpg"
+                    alt="Goliath Logo"
+                    className="w-full h-full object-cover"
+                  />
                 </div>
                 <div>
-                  <h1 className="text-base font-black uppercase tracking-widest text-white">
-                    Brass Bell
+                  <h1 className="text-lg font-black uppercase tracking-wider text-white">
+                    Goliath
                   </h1>
                   <p className="text-[11px] text-sky-400 font-semibold">
-                    Fit & Body Tracker 2.0
+                    Workout & Evolution Tracker
                   </p>
                 </div>
               </div>
@@ -367,9 +371,13 @@ export default function HomePage() {
       <main className="flex-1 md:pl-64 pb-24 md:pb-10">
         {/* Top Mobile Header */}
         <header className="md:hidden flex items-center justify-between px-4 py-3 bg-slate-900 border-b border-slate-800">
-          <div className="flex items-center gap-2">
-            <div className="w-7 h-7 rounded-lg bg-sky-500 flex items-center justify-center text-slate-950 font-black text-xs shrink-0">
-              BB
+          <div className="flex items-center gap-2.5">
+            <div className="w-8 h-8 rounded-lg overflow-hidden border border-amber-500/30 bg-slate-950 shrink-0">
+              <img
+                src="/goliath-logo.jpg"
+                alt="Goliath Logo"
+                className="w-full h-full object-cover"
+              />
             </div>
             <div>
               <div className="flex items-center gap-1.5 leading-none">
@@ -383,7 +391,7 @@ export default function HomePage() {
                 </span>
               </div>
               <h1 className="text-xs font-black uppercase tracking-wider text-white mt-0.5">
-                Brass Bell 2.0
+                Goliath
               </h1>
             </div>
           </div>
@@ -465,7 +473,7 @@ export default function HomePage() {
                 Manhã de Morango S/A
               </span>
             </div>
-            <span>Brass Bell 2.0 • Biomechanics & Body Evolution</span>
+            <span>Goliath • Biomechanics & Strength Tracker</span>
           </footer>
         </div>
       </main>

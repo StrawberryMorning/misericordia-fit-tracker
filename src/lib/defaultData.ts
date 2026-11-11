@@ -2,7 +2,7 @@ import { AppDatabase } from "./types";
 
 export const DEFAULT_DATABASE: AppDatabase = {
   profile: {
-    name: "Atleta Brass Bell",
+    name: "Atleta Goliath",
     heightCm: 169,
     age: 21,
     sex: "male",
