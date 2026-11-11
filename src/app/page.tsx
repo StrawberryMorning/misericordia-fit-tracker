@@ -220,12 +220,12 @@ export default function HomePage() {
   };
 
   return (
-    <div className="min-h-screen flex flex-col md:flex-row bg-slate-950 text-slate-100 relative">
-      {/* Background Dinâmico do Titã Atlas com Parallax da Abóbada Celeste */}
+    <div className="app-shell-bg min-h-screen flex flex-col md:flex-row text-slate-100 relative">
+      {/* Coluna Artística Fixa do Titã Atlas com Convergência da Abóbada Celeste no Scroll */}
       <AtlasBackground />
 
-      {/* Desktop Left Sidebar */}
-      <aside className="hidden md:flex md:w-64 md:flex-col md:fixed md:inset-y-0 bg-slate-900/95 border-r border-slate-800 p-5 justify-between">
+      {/* Desktop Left Sidebar - z-40 garante que os cliques nas abas nunca sejam bloqueados */}
+      <aside className="hidden md:flex md:w-64 md:flex-col md:fixed md:inset-y-0 md:left-0 z-40 bg-slate-900/95 border-r border-slate-800 p-5 justify-between shadow-xl">
         <div className="space-y-6">
           <div>
             {/* Assinatura Trademark: Manhã de Morango S/A */}
@@ -371,10 +371,10 @@ export default function HomePage() {
         </div>
       </aside>
 
-      {/* Main Content Area */}
-      <main className="flex-1 md:pl-64 pb-24 md:pb-10 relative z-10">
+      {/* Main Content Area - deslocado à direita da Sidebar + Coluna do Atlas */}
+      <main className="flex-1 min-h-[128vh] md:ml-[526px] lg:ml-[576px] xl:ml-[616px] 2xl:ml-[656px] pb-24 md:pb-16 relative z-10">
         {/* Top Mobile Header */}
-        <header className="md:hidden flex items-center justify-between px-4 py-3 bg-slate-900 border-b border-slate-800">
+        <header className="md:hidden sticky top-0 z-30 flex items-center justify-between px-4 py-3 bg-slate-900 border-b border-slate-800">
           <div className="flex items-center gap-2.5">
             <div className="w-8 h-8 rounded-lg overflow-hidden border border-amber-500/30 bg-slate-950 shrink-0">
               <img
