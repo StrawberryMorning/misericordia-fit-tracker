@@ -14,6 +14,7 @@ import { normalizeDatabase } from "@/lib/trainingBlocks";
 import { DashboardTab } from "@/components/DashboardTab";
 import { WorkoutTrackerTab } from "@/components/WorkoutTrackerTab";
 import { BodyTrackerTab } from "@/components/BodyTrackerTab";
+import { AtlasBackground } from "@/components/AtlasBackground";
 import {
   Cloud,
   Download,
@@ -219,7 +220,10 @@ export default function HomePage() {
   };
 
   return (
-    <div className="min-h-screen flex flex-col md:flex-row bg-slate-950 text-slate-100">
+    <div className="min-h-screen flex flex-col md:flex-row bg-slate-950 text-slate-100 relative">
+      {/* Background Dinâmico do Titã Atlas com Parallax da Abóbada Celeste */}
+      <AtlasBackground />
+
       {/* Desktop Left Sidebar */}
       <aside className="hidden md:flex md:w-64 md:flex-col md:fixed md:inset-y-0 bg-slate-900/95 border-r border-slate-800 p-5 justify-between">
         <div className="space-y-6">
@@ -368,7 +372,7 @@ export default function HomePage() {
       </aside>
 
       {/* Main Content Area */}
-      <main className="flex-1 md:pl-64 pb-24 md:pb-10">
+      <main className="flex-1 md:pl-64 pb-24 md:pb-10 relative z-10">
         {/* Top Mobile Header */}
         <header className="md:hidden flex items-center justify-between px-4 py-3 bg-slate-900 border-b border-slate-800">
           <div className="flex items-center gap-2.5">

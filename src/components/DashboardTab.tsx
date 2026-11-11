@@ -3,7 +3,6 @@
 import React, { useState } from "react";
 import { BodyLog, UserProfile, WorkoutSession } from "@/lib/types";
 import { EvolutionChart } from "./EvolutionChart";
-import { AtlasScrollHero } from "./AtlasScrollHero";
 import { getBFCategory } from "@/lib/formulas";
 import {
   Activity,
@@ -61,9 +60,6 @@ export function DashboardTab({
 
   return (
     <div className="space-y-6">
-      {/* Hero Interativo Conceitual de Atlas com Parallax da Abóbada Celeste */}
-      <AtlasScrollHero onStartWorkout={() => onNavigateTab("workout")} />
-
       {/* KPI Cards */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
         <div className="bg-slate-900/90 border border-slate-800 rounded-2xl p-4">

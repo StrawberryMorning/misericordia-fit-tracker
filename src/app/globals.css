@@ -16,9 +16,36 @@ html:not(.dark) {
 }
 
 /* ========================================================
-   ADAPTAÇÃO GLOBAL DO TEMA CLARO (html:not(.dark))
-   Mapeia suavemente as tonalidades de slate escuro para claro
-   garantindo contraste impecável, legibilidade e elegância.
+   TEMA ESCURO (html.dark)
+   Vidro fosco refinado para que a arte de Atlas no fundo
+   seja vislumbrada com sutileza, mantendo contraste 100% legível.
+   ======================================================== */
+
+html.dark body {
+  background-color: #030712 !important; /* gray-950 */
+  color: #f3f4f6 !important;
+}
+
+html.dark .bg-slate-900\/90,
+html.dark .bg-slate-900\/95,
+html.dark .bg-slate-900 {
+  background-color: rgba(15, 23, 42, 0.78) !important;
+  backdrop-filter: blur(12px) !important;
+  -webkit-backdrop-filter: blur(12px) !important;
+}
+
+html.dark .bg-slate-950\/80,
+html.dark .bg-slate-950\/90,
+html.dark .bg-slate-950 {
+  background-color: rgba(2, 6, 23, 0.75) !important;
+  backdrop-filter: blur(8px) !important;
+  -webkit-backdrop-filter: blur(8px) !important;
+}
+
+/* ========================================================
+   TEMA CLARO (html:not(.dark))
+   Visual translúcido 'frosted glass' estilo Apple/iOS
+   com contraste perfeito e elegância de mármore.
    ======================================================== */
 
 html:not(.dark) body {
@@ -26,22 +53,29 @@ html:not(.dark) body {
   color: #0f172a !important; /* slate-900 */
 }
 
-/* Fundo principal e containers */
+/* Fundo translúcido refinado para permitir que o relevo do Atlas seja visto */
 html:not(.dark) .bg-slate-950,
 html:not(.dark) [class*="bg-slate-950/"] {
-  background-color: #ffffff !important;
+  background-color: rgba(255, 255, 255, 0.85) !important;
+  backdrop-filter: blur(12px) !important;
+  -webkit-backdrop-filter: blur(12px) !important;
 }
 
 html:not(.dark) .bg-slate-900,
 html:not(.dark) [class*="bg-slate-900/"] {
-  background-color: #f1f5f9 !important; /* slate-100 */
+  background-color: rgba(248, 250, 252, 0.82) !important;
+  backdrop-filter: blur(12px) !important;
+  -webkit-backdrop-filter: blur(12px) !important;
+  box-shadow: 0 4px 14px 0 rgba(0, 0, 0, 0.04);
 }
 
 html:not(.dark) aside.bg-slate-900\/95,
 html:not(.dark) header.bg-slate-900,
 html:not(.dark) nav.bg-slate-900\/95 {
-  background-color: #ffffff !important;
-  box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.05);
+  background-color: rgba(255, 255, 255, 0.92) !important;
+  backdrop-filter: blur(16px) !important;
+  -webkit-backdrop-filter: blur(16px) !important;
+  box-shadow: 0 1px 4px 0 rgba(0, 0, 0, 0.06);
 }
 
 /* Botões cinza padrão (bg-slate-800) no tema claro */
@@ -104,13 +138,15 @@ html:not(.dark) textarea:focus {
 /* Modais e backdrops */
 html:not(.dark) .bg-slate-950\/85 {
   background-color: rgba(15, 23, 42, 0.45) !important;
+  backdrop-filter: blur(8px) !important;
+  -webkit-backdrop-filter: blur(8px) !important;
 }
 
 /* Cards com gradiente ou destaques escuros */
 html:not(.dark) [class*="from-slate-900"],
 html:not(.dark) [class*="from-sky-950"],
 html:not(.dark) [class*="from-indigo-950"] {
-  background: #ffffff !important;
+  background: rgba(255, 255, 255, 0.9) !important;
   border-color: #e2e8f0 !important;
 }
 
