@@ -194,7 +194,7 @@ export default function HomePage() {
     const url = URL.createObjectURL(blob);
     const a = document.createElement("a");
     a.href = url;
-    a.download = `goliath-backup-${
+    a.download = `atlas-backup-${
       new Date().toISOString().split("T")[0]
     }.json`;
     a.click();
@@ -240,17 +240,17 @@ export default function HomePage() {
               <div className="flex items-center gap-3">
                 <div className="w-10 h-10 rounded-xl overflow-hidden border border-amber-500/30 shadow-lg shadow-amber-950/40 bg-slate-950 shrink-0">
                   <img
-                    src="/goliath-logo.jpg"
-                    alt="Goliath Logo"
+                    src="/atlas-full.jpg"
+                    alt="ATLAS Logo"
                     className="w-full h-full object-cover"
                   />
                 </div>
                 <div>
-                  <h1 className="text-lg font-black uppercase tracking-wider text-white">
-                    Goliath
+                  <h1 className="text-lg font-black uppercase tracking-wider text-white font-serif">
+                    ATLAS
                   </h1>
-                  <p className="text-[11px] text-sky-400 font-semibold">
-                    Workout & Evolution Tracker
+                  <p className="text-[11px] text-amber-400 font-semibold">
+                    Strength & Biomechanics
                   </p>
                 </div>
               </div>
@@ -374,8 +374,8 @@ export default function HomePage() {
           <div className="flex items-center gap-2.5">
             <div className="w-8 h-8 rounded-lg overflow-hidden border border-amber-500/30 bg-slate-950 shrink-0">
               <img
-                src="/goliath-logo.jpg"
-                alt="Goliath Logo"
+                src="/atlas-full.jpg"
+                alt="ATLAS Logo"
                 className="w-full h-full object-cover"
               />
             </div>
@@ -390,8 +390,8 @@ export default function HomePage() {
                   Manhã de Morango S/A
                 </span>
               </div>
-              <h1 className="text-xs font-black uppercase tracking-wider text-white mt-0.5">
-                Goliath
+              <h1 className="text-xs font-black uppercase tracking-wider text-white mt-0.5 font-serif">
+                ATLAS
               </h1>
             </div>
           </div>
@@ -473,7 +473,7 @@ export default function HomePage() {
                 Manhã de Morango S/A
               </span>
             </div>
-            <span>Goliath • Biomechanics & Strength Tracker</span>
+            <span>ATLAS • Strength, Biomechanics & Body Evolution</span>
           </footer>
         </div>
       </main>

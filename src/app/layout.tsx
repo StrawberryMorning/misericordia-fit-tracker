@@ -2,12 +2,12 @@ import type { Metadata } from "next";
 import "./globals.css";
 
 export const metadata: Metadata = {
-  title: "Goliath — Evolution & Workout Tracker",
+  title: "ATLAS — Biomechanics, Strength & Evolution",
   description:
-    "Sistema unificado de acompanhamento de treinos ao vivo, periodização por blocos, medidas corporais e análise biomecânica",
+    "O peso do cosmos sob teus ombros. Sistema de treino de força, periodização por blocos semanais e compêndio biomecânico.",
   icons: {
-    icon: "/goliath-logo.jpg",
-    apple: "/goliath-logo.jpg",
+    icon: "/atlas-full.jpg",
+    apple: "/atlas-full.jpg",
   },
 };
 
